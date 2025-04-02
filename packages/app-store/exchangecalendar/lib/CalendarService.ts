@@ -1,4 +1,4 @@
-import { XhrApi } from "@ewsjs/xhr";
+import type { FindFoldersResults, FindItemsResults } from "ews-javascript-api";
 import {
   Appointment,
   Attendee,
@@ -8,8 +8,6 @@ import {
   DateTime,
   DeleteMode,
   ExchangeService,
-  FindFoldersResults,
-  FindItemsResults,
   Folder,
   FolderId,
   FolderSchema,
@@ -30,7 +28,7 @@ import {
 
 import { symmetricDecrypt } from "@calcom/lib/crypto";
 import logger from "@calcom/lib/logger";
-import {
+import type {
   Calendar,
   CalendarEvent,
   EventBusyDate,
@@ -38,7 +36,7 @@ import {
   NewCalendarEventType,
   Person,
 } from "@calcom/types/Calendar";
-import { CredentialPayload } from "@calcom/types/Credential";
+import type { CredentialPayload } from "@calcom/types/Credential";
 
 import { ExchangeAuthentication } from "../enums";
 
@@ -49,14 +47,14 @@ export default class ExchangeCalendarService implements Calendar {
 
   constructor(credential: CredentialPayload) {
     this.integrationName = "exchange_calendar";
-    this.log = logger.getChildLogger({ prefix: [`[[lib] ${this.integrationName}`] });
+    this.log = logger.getSubLogger({ prefix: [`[[lib] ${this.integrationName}`] });
     this.payload = JSON.parse(
       symmetricDecrypt(credential.key?.toString() || "", process.env.CALENDSO_ENCRYPTION_KEY || "")
     );
   }
 
   async createEvent(event: CalendarEvent): Promise<NewCalendarEventType> {
-    const appointment: Appointment = new Appointment(this.getExchangeService());
+    const appointment: Appointment = new Appointment(await this.getExchangeService());
     appointment.Subject = event.title;
     appointment.Start = DateTime.Parse(event.startTime);
     appointment.End = DateTime.Parse(event.endTime);
@@ -65,6 +63,11 @@ export default class ExchangeCalendarService implements Calendar {
     event.attendees.forEach((attendee: Person) => {
       appointment.RequiredAttendees.Add(new Attendee(attendee.email));
     });
+    if (event.team?.members) {
+      event.team.members.forEach((member: Person) => {
+        appointment.RequiredAttendees.Add(new Attendee(member.email));
+      });
+    }
     return appointment
       .Save(SendInvitationsMode.SendToAllAndSaveCopy)
       .then(() => {
@@ -87,7 +90,7 @@ export default class ExchangeCalendarService implements Calendar {
     uid: string,
     event: CalendarEvent
   ): Promise<NewCalendarEventType | NewCalendarEventType[]> {
-    const appointment: Appointment = await Appointment.Bind(this.getExchangeService(), new ItemId(uid));
+    const appointment: Appointment = await Appointment.Bind(await this.getExchangeService(), new ItemId(uid));
     appointment.Subject = event.title;
     appointment.Start = DateTime.Parse(event.startTime);
     appointment.End = DateTime.Parse(event.endTime);
@@ -96,6 +99,11 @@ export default class ExchangeCalendarService implements Calendar {
     event.attendees.forEach((attendee: Person) => {
       appointment.RequiredAttendees.Add(new Attendee(attendee.email));
     });
+    if (event.team?.members) {
+      event.team.members.forEach((member) => {
+        appointment.RequiredAttendees.Add(new Attendee(member.email));
+      });
+    }
     return appointment
       .Update(
         ConflictResolutionMode.AlwaysOverwrite,
@@ -118,7 +126,7 @@ export default class ExchangeCalendarService implements Calendar {
   }
 
   async deleteEvent(uid: string): Promise<void> {
-    const appointment: Appointment = await Appointment.Bind(this.getExchangeService(), new ItemId(uid));
+    const appointment: Appointment = await Appointment.Bind(await this.getExchangeService(), new ItemId(uid));
     return appointment.Delete(DeleteMode.MoveToDeletedItems).catch((reason) => {
       this.log.error(reason);
       throw reason;
@@ -134,7 +142,7 @@ export default class ExchangeCalendarService implements Calendar {
     const promises: Promise<EventBusyDate[]>[] = calendars
       .filter((lcal) => selectedCalendars.some((rcal) => lcal.externalId == rcal.externalId))
       .map(async (calendar) => {
-        return this.getExchangeService()
+        return (await this.getExchangeService())
           .FindAppointments(
             new FolderId(calendar.externalId),
             new CalendarView(DateTime.Parse(dateFrom), DateTime.Parse(dateTo))
@@ -158,7 +166,7 @@ export default class ExchangeCalendarService implements Calendar {
   }
 
   async listCalendars(): Promise<IntegrationCalendar[]> {
-    const service: ExchangeService = this.getExchangeService();
+    const service: ExchangeService = await this.getExchangeService();
     const view: FolderView = new FolderView(1000);
     view.PropertySet = new PropertySet(BasePropertySet.IdOnly);
     view.PropertySet.Add(FolderSchema.ParentFolderId);
@@ -188,14 +196,14 @@ export default class ExchangeCalendarService implements Calendar {
       });
   }
 
-  private getExchangeService(): ExchangeService {
-    const service: ExchangeService = new ExchangeService();
+  private async getExchangeService(): Promise<ExchangeService> {
+    const service: ExchangeService = new ExchangeService(this.payload.exchangeVersion);
     service.Credentials = new WebCredentials(this.payload.username, this.payload.password);
     service.Url = new Uri(this.payload.url);
     if (this.payload.authenticationMethod === ExchangeAuthentication.NTLM) {
-      const xhr: XhrApi = new XhrApi({
+      const { XhrApi } = await import("@ewsjs/xhr");
+      const xhr = new XhrApi({
         rejectUnauthorized: false,
-        gzip: this.payload.useCompression,
       }).useNtlmAuthentication(this.payload.username, this.payload.password);
       service.XHRApi = xhr;
     }

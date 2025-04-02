@@ -1,3 +1,38 @@
 {
-  "extends": "@calcom/tsconfig/react-library.json"
+  "extends": "@calcom/tsconfig/react-library.json",
+  "paths": {
+    "~/*": ["/*"],
+    "@calcom/app-store": ["../app-store"],
+    "@calcom/app-store/*": ["../app-store/*"],
+    "@calcom/dayjs": ["../dayjs"],
+    "@calcom/dayjs/*": ["../dayjs/*"],
+    "@calcom/features": ["../features"],
+    "@calcom/features/*": ["../features/*"],
+    "@calcom/lib": ["../lib"],
+    "@calcom/lib/*": ["../lib/*"],
+    "@calcom/prisma": ["../prisma"],
+    "@calcom/prisma/*": ["../prisma/*"],
+    "@calcom/repository/*": ["../lib/server/repository/*"]
+  },
+  "include": [
+    "../types/@wojtekmaj__react-daterange-picker.d.ts",
+    "../types/business-days-plugin.d.ts",
+    "../types/next-auth.d.ts",
+    "../types/tanstack-table.d.ts",
+    "../types/next.d.ts",
+    "../types/window.d.ts",
+    "./server"
+  ],
+  "exclude": ["**/node_modules/**", "./react", "./server/**/*.test.ts", "./server/**/*.spec.ts"],
+  "compilerOptions": {
+    "isolatedModules": false,
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "experimentalDecorators": true,
+    "declarationMap": false,
+    "resolveJsonModule": true,
+    "declarationDir": "types/server",
+    "moduleResolution": "node"
+  }
 }

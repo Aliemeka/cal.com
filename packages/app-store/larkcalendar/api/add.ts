@@ -3,10 +3,11 @@ import { stringify } from "querystring";
 import { z } from "zod";
 
 import { WEBAPP_URL } from "@calcom/lib/constants";
-import { defaultHandler, defaultResponder } from "@calcom/lib/server";
+import { defaultHandler } from "@calcom/lib/server/defaultHandler";
+import { defaultResponder } from "@calcom/lib/server/defaultResponder";
 
-import { encodeOAuthState } from "../../_utils/encodeOAuthState";
 import getAppKeysFromSlug from "../../_utils/getAppKeysFromSlug";
+import { encodeOAuthState } from "../../_utils/oauth/encodeOAuthState";
 import { LARK_HOST } from "../common";
 
 const larkKeysSchema = z.object({
@@ -22,7 +23,7 @@ async function getHandler(req: NextApiRequest) {
 
   const params = {
     app_id,
-    redirect_uri: WEBAPP_URL + "/api/integrations/larkcalendar/callback",
+    redirect_uri: `${WEBAPP_URL}/api/integrations/larkcalendar/callback`,
     state,
   };
 

@@ -1,28 +1,17 @@
+"use client";
+
 import { useState } from "react";
 
+import { isDelegationCredential } from "@calcom/lib/delegationCredential/clientAndServer";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import { trpc } from "@calcom/trpc/react";
-import {
-  Button,
-  ButtonProps,
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-  Icon,
-  showToast,
-  DialogFooter,
-  DialogClose,
-} from "@calcom/ui";
+import type { ButtonProps } from "@calcom/ui/components/button";
+import { DisconnectIntegrationComponent } from "@calcom/ui/components/disconnect-calendar-integration";
+import { showToast } from "@calcom/ui/components/toast";
 
-export default function DisconnectIntegration({
-  credentialId,
-  label,
-  trashIcon,
-  isGlobal,
-  onSuccess,
-  buttonProps,
-}: {
+export default function DisconnectIntegration(props: {
   credentialId: number;
+  teamId?: number | null;
   label?: string;
   trashIcon?: boolean;
   isGlobal?: boolean;
@@ -30,8 +19,9 @@ export default function DisconnectIntegration({
   buttonProps?: ButtonProps;
 }) {
   const { t } = useLocale();
+  const { onSuccess, credentialId, teamId } = props;
   const [modalOpen, setModalOpen] = useState(false);
-  const utils = trpc.useContext();
+  const utils = trpc.useUtils();
 
   const mutation = trpc.viewer.deleteCredential.useMutation({
     onSuccess: () => {
@@ -45,35 +35,19 @@ export default function DisconnectIntegration({
     },
     async onSettled() {
       await utils.viewer.connectedCalendars.invalidate();
+      await utils.viewer.apps.integrations.invalidate();
     },
   });
 
+  // Such a credential is added in-memory and removed when Delegation credential is disabled.
+  const disableDisconnect = isDelegationCredential({ credentialId });
   return (
-    <>
-      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogTrigger asChild>
-          <Button
-            color={buttonProps?.color || "destructive"}
-            StartIcon={trashIcon ? Icon.FiTrash : undefined}
-            size={trashIcon && !label ? "icon" : "base"}
-            disabled={isGlobal}
-            {...buttonProps}>
-            {label && label}
-          </Button>
-        </DialogTrigger>
-        <DialogContent
-          title={t("remove_app")}
-          description={t("are_you_sure_you_want_to_remove_this_app")}
-          type="confirmation"
-          Icon={Icon.FiAlertCircle}>
-          <DialogFooter>
-            <DialogClose onClick={() => setModalOpen(false)} />
-            <DialogClose color="primary" onClick={() => mutation.mutate({ id: credentialId })}>
-              {t("yes_remove_app")}
-            </DialogClose>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+    <DisconnectIntegrationComponent
+      onDeletionConfirmation={() => mutation.mutate({ id: credentialId, ...(teamId ? { teamId } : {}) })}
+      isModalOpen={modalOpen}
+      onModalOpen={() => setModalOpen((prevValue) => !prevValue)}
+      disabled={disableDisconnect}
+      {...props}
+    />
   );
 }

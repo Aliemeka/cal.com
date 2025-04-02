@@ -1,28 +1,36 @@
-import { cva, VariantProps } from "class-variance-authority";
-import Link, { LinkProps } from "next/link";
+import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
+import type { LinkProps } from "next/link";
+import Link from "next/link";
 import React, { forwardRef } from "react";
 
-import classNames from "@calcom/lib/classNames";
-import { applyStyleToMultipleVariants } from "@calcom/lib/cva";
-import { SVGComponent } from "@calcom/types/SVGComponent";
-import { Tooltip } from "@calcom/ui";
-import { Icon } from "@calcom/ui";
+import classNames from "@calcom/ui/classNames";
+
+import { Icon } from "../icon/Icon";
+import type { IconName } from "../icon/Icon";
+import { Tooltip } from "../tooltip/Tooltip";
 
 type InferredVariantProps = VariantProps<typeof buttonClasses>;
 
+export type ButtonColor = NonNullable<InferredVariantProps["color"]>;
 export type ButtonBaseProps = {
   /** Action that happens when the button is clicked */
   onClick?: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
   /**Left aligned icon*/
-  StartIcon?: SVGComponent | React.ElementType;
+  CustomStartIcon?: React.ReactNode;
+  StartIcon?: IconName;
   /**Right aligned icon */
-  EndIcon?: SVGComponent;
+  EndIcon?: IconName;
   shallow?: boolean;
   /**Tool tip used when icon size is set to small */
-  tooltip?: string;
+  tooltip?: string | React.ReactNode;
+  tooltipSide?: "top" | "right" | "bottom" | "left";
+  tooltipOffset?: number;
+  tooltipClassName?: string;
+  disabled?: boolean;
   flex?: boolean;
 } & Omit<InferredVariantProps, "color"> & {
-    color?: NonNullable<InferredVariantProps["color"]>;
+    color?: ButtonColor;
   };
 
 export type ButtonProps = ButtonBaseProps &
@@ -31,109 +39,178 @@ export type ButtonProps = ButtonBaseProps &
     | (Omit<JSX.IntrinsicElements["button"], "onClick" | "ref"> & { href?: never })
   );
 
-const buttonClasses = cva(
-  "inline-flex items-center text-sm font-medium relative rounded-md transition-colors",
+export const buttonClasses = cva(
+  "group whitespace-nowrap inline-flex items-center text-sm font-medium relative rounded-[10px] transition disabled:cursor-not-allowed gap-1",
   {
     variants: {
+      variant: {
+        button: "",
+        icon: "flex justify-center",
+        fab: "min-w-14 min-h-14 md:min-w-min md:min-h-min rounded-full justify-center md:rounded-[10px] radix-state-open:rotate-45 md:radix-state-open:rotate-0 radix-state-open:shadown-none radix-state-open:ring-0",
+      },
       color: {
-        primary: "text-white dark:text-black",
-        secondary: "text-gray-900 dark:text-darkgray-900",
-        minimal: "text-gray-900 dark:text-darkgray-900",
-        destructive: "",
+        primary: [
+          // Base colors
+          "bg-brand-default",
+          "text-brand",
+          // Focus state
+          "focus-visible:outline-none",
+          "focus-visible:ring-0",
+          "focus-visible:shadow-button-solid-brand-focused",
+          // Border
+          "border border-brand-default",
+          // Disabled
+          "disabled:opacity-30",
+          // Shadows and effects
+          "shadow-button-solid-brand-default",
+          "enabled:active:shadow-button-solid-brand-active",
+          "enabled:hover:shadow-button-solid-brand-hover",
+          "transition-shadow",
+          "transition-transform",
+          "duration-100",
+        ],
+
+        secondary: [
+          // Base colors and border
+          "bg-default",
+          "text-default",
+          "border",
+          "border-default",
+          // Hover state
+          "enabled:hover:bg-muted",
+          "enabled:hover:border-emphasis",
+          "enabled:hover:text-emphasis",
+          // Disabled
+          "disabled:opacity-30",
+          // Focus state
+          "focus-visible:bg-subtle",
+          "focus-visible:outline-none",
+          "focus-visible:ring-0",
+          "focus-visible:shadow-outline-gray-focused",
+          // Shadows and effects
+          "shadow-outline-gray-rested",
+          "enabled:hover:shadow-outline-gray-hover",
+          "enabled:active:shadow-outline-gray-active",
+          "transition-shadow",
+          "duration-200",
+        ],
+
+        minimal: [
+          // Base color
+          "text-subtle",
+          "border border-transparent",
+          // Hover
+          "enabled:hover:bg-subtle",
+          "enabled:hover:text-emphasis",
+          "enabled:hover:border-subtle hover:border",
+          // Disabled
+          "disabled:opacity-30",
+          // Focus
+          "focus-visible:bg-subtle",
+          "focus-visible:outline-none",
+          "focus-visible:ring-0",
+          "focus-visible:border-subtle",
+          "focus-visible:shadow-button-outline-gray-focused",
+
+          // Shadows and effects
+          "enabled:active:shadow-outline-gray-active",
+          "transition-shadow",
+          "duration-200",
+        ],
+
+        destructive: [
+          // Base colors and border
+          "border",
+          "border-default",
+          "text-error",
+          // Hover state
+          "dark:hover:text-red-100",
+          "hover:border-semantic-danager-subtle",
+          "hover:bg-error",
+          // Focus state
+          "focus-visible:text-red-700",
+          "focus-visible:bg-error",
+          "focus-visible:outline-none",
+          "focus-visible:ring-0",
+          "focus-visible:shadow-button-outline-red-focused",
+          // Disabled state
+          "disabled:bg-red-100",
+          "disabled:border-red-200",
+          "disabled:text-red-700",
+          "disabled:hover:border-red-200",
+          "disabled:opacity-30",
+          // Shadows and effects
+          "shadow-outline-red-rested",
+          "enabled:hover:shadow-outline-red-hover",
+          "enabled:active:shadow-outline-red-active",
+          "transition-shadow",
+          "duration-200",
+        ],
       },
       size: {
-        sm: "px-3 py-2 leading-4 rounded-sm" /** For backwards compatibility */,
-        base: "h-9 px-4 py-2.5 ",
-        lg: "h-[36px] px-4 py-2.5 ",
-        icon: "flex justify-center min-h-[36px] min-w-[36px] ",
-        // fab = floating action button, used for the main action in a page.
-        // it uses the same primary classNames for desktop size
-        fab: "h-14 w-14 sm:h-9 sm:w-auto rounded-full justify-center sm:rounded-md sm:px-4 sm:py-2.5 radix-state-open:rotate-45 sm:radix-state-open:rotate-0 transition-transform radix-state-open:shadown-none radix-state-open:ring-0 !shadow-none",
+        xs: "h-6 p-2 leading-none text-xs rounded-md",
+        sm: "h-7 px-2 py-1.5 leading-none text-sm" /** For backwards compatibility */,
+        base: "px-2.5 py-2 text-sm leading-none",
+        lg: "px-3 py-2.5 ",
       },
       loading: {
         true: "cursor-wait",
-      },
-      disabled: {
-        true: "cursor-not-allowed",
       },
     },
     compoundVariants: [
       // Primary variants
       {
-        disabled: true,
-        color: "primary",
-        className: "bg-gray-800 bg-opacity-30 dark:bg-opacity-30 dark:bg-darkgray-800",
-      },
-      {
         loading: true,
         color: "primary",
-        className: "bg-gray-800/30 text-white/30 dark:bg-opacity-30 dark:bg-darkgray-700 dark:text-black/30",
+        className: "opacity-30",
       },
-      ...applyStyleToMultipleVariants({
-        disabled: [undefined, false],
-        color: "primary",
-        className:
-          "bg-brand-500 hover:bg-brand-400 focus:border focus:border-white focus:outline-none focus:ring-2 focus:ring-offset focus:ring-brand-500 dark:hover:bg-darkgray-600 dark:bg-darkgray-900",
-      }),
       // Secondary variants
       {
-        disabled: true,
-        color: "secondary",
-        className:
-          "border border-gray-200 bg-opacity-30 text-gray-900/30 bg-white dark:bg-darkgray-100 dark:text-darkgray-900/30 dark:border-darkgray-200",
-      },
-      {
         loading: true,
         color: "secondary",
-        className:
-          "bg-gray-100 text-gray-900/30 dark:bg-darkgray-100 dark:text-darkgray-900/30 dark:border-darkgray-200",
+        className: "bg-subtle text-emphasis/80",
       },
-      ...applyStyleToMultipleVariants({
-        disabled: [undefined, false],
-        color: "secondary",
-        className:
-          "border border-gray-300 dark:border-darkgray-300 hover:bg-gray-50 hover:border-gray-400 focus:bg-gray-100 dark:hover:bg-darkgray-200 dark:focus:bg-darkgray-200 focus:outline-none focus:ring-2 focus:ring-offset focus:ring-gray-900 dark:focus:ring-white",
-      }),
       // Minimal variants
       {
-        disabled: true,
-        color: "minimal",
-        className:
-          "border:gray-200 bg-opacity-30 text-gray-900/30 dark:bg-darkgray-100 dark:text-darkgray-900/30 dark:border-darkgray-200",
-      },
-      {
         loading: true,
         color: "minimal",
-        className:
-          "bg-gray-100 text-gray-900/30 dark:bg-darkgray-100 dark:text-darkgray-900/30 dark:border-darkgray-200",
+        className: "bg-subtle text-emphasis/30",
       },
-      ...applyStyleToMultipleVariants({
-        disabled: [undefined, false],
-        color: "minimal",
-        className:
-          "hover:bg-gray-100 focus:bg-gray-100 dark:hover:bg-darkgray-200 dark:focus:bg-darkgray-200 focus:outline-none focus:ring-2 focus:ring-offset focus:ring-gray-900 dark:focus:ring-white",
-      }),
       // Destructive variants
       {
-        disabled: true,
-        color: "destructive",
-        className:
-          "text-red-700/30 dark:text-red-700/30 bg-red-100/40 dark:bg-red-100/80 border border-red-200",
-      },
-      {
         loading: true,
         color: "destructive",
         className:
-          "text-red-700/30 dark:text-red-700/30 hover:text-red-700/30 bg-red-100 border border-red-200",
+          "text-red-700/30 dark:text-red-700/30 hover:text-red-700/30  border border-default text-emphasis",
       },
-      ...applyStyleToMultipleVariants({
-        disabled: [false, undefined],
-        color: "destructive",
-        className:
-          "border dark:text-white text-gray-900 hover:text-red-700 focus:text-red-700 dark:hover:text-red-700 dark:focus:text-red-700 hover:border-red-100 focus:border-red-100 hover:bg-red-100  focus:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset focus:ring-red-700",
-      }),
+      {
+        variant: "icon",
+        size: "base",
+        className: "min-h-[36px] min-w-[36px] !p-2 hover:border-default",
+      },
+      {
+        variant: "icon",
+        size: "xs",
+        className: "h-5 w-5 !p-1 rounded-md",
+      },
+      {
+        variant: "icon",
+        size: "sm",
+        className: "h-6 w-6 !p-1 rounded-md",
+      },
+      {
+        variant: "icon",
+        size: "lg",
+        className: "h-10 w-10 !p-1",
+      },
+      {
+        variant: "fab",
+        size: "base",
+        className: "md:px-4 md:py-2.5",
+      },
     ],
     defaultVariants: {
+      variant: "button",
       color: "primary",
       size: "base",
     },
@@ -148,8 +225,13 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, ButtonPr
     loading = false,
     color = "primary",
     size,
+    variant = "button",
     type = "button",
+    tooltipSide = "top",
+    tooltipOffset = 4,
+    tooltipClassName,
     StartIcon,
+    CustomStartIcon,
     EndIcon,
     shallow,
     // attributes propagated from `HTMLAnchorProps` or `HTMLButtonProps`
@@ -167,10 +249,7 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, ButtonPr
       disabled,
       type: !isLink ? type : undefined,
       ref: forwardedRef,
-      className: classNames(
-        buttonClasses({ color, size, loading, disabled: props.disabled }),
-        props.className
-      ),
+      className: classNames(buttonClasses({ color, size, loading, variant }), props.className),
       // if we click a disabled button, we prevent going through the click handler
       onClick: disabled
         ? (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
@@ -179,28 +258,44 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, ButtonPr
         : props.onClick,
     },
     <>
-      {StartIcon && (
-        <>
-          {size === "fab" ? (
-            <>
-              <StartIcon className="hidden h-4 w-4 stroke-[1.5px] ltr:mr-2 rtl:ml-2 sm:inline-flex" />
-              <Icon.FiPlus className="inline h-6 w-6 sm:hidden" />
-            </>
-          ) : (
-            <StartIcon
-              className={classNames(
-                "inline-flex",
-                size === "icon" ? "h-4 w-4 " : "h-4 w-4 stroke-[1.5px] ltr:mr-2 rtl:ml-2"
-              )}
-            />
-          )}
-        </>
-      )}
-      {size === "fab" ? <span className="hidden sm:inline">{props.children}</span> : props.children}
+      {CustomStartIcon ||
+        (StartIcon && (
+          <>
+            {variant === "fab" ? (
+              <>
+                <Icon name={StartIcon} className="hidden h-4 w-4 stroke-[1.5px]  md:inline-flex" />
+                <Icon name="plus" data-testid="plus" className="inline h-6 w-6 md:hidden" />
+              </>
+            ) : (
+              <Icon
+                data-name="start-icon"
+                name={StartIcon}
+                className={classNames(
+                  loading ? "invisible" : "visible",
+                  "button-icon group-active:translate-y-[0.5px]",
+                  variant === "icon" && "h-4 w-4",
+                  variant === "button" && "h-4 w-4 stroke-[1.5px] "
+                )}
+              />
+            )}
+          </>
+        ))}
+      <div
+        className={classNames(
+          "contents", // This makes the div behave like it doesn't exist in the layout
+          loading ? "invisible" : "visible",
+          variant === "fab" ? "hidden md:contents" : "",
+          "group-active:translate-y-[0.5px]"
+        )}>
+        {props.children}
+      </div>
       {loading && (
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform">
           <svg
-            className="mx-4 h-5 w-5 animate-spin text-black dark:text-white"
+            className={classNames(
+              "mx-4 h-5 w-5 animate-spin",
+              color === "primary" ? "text-inverted" : "text-emphasis"
+            )}
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24">
@@ -215,13 +310,21 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, ButtonPr
       )}
       {EndIcon && (
         <>
-          {size === "fab" ? (
+          {variant === "fab" ? (
             <>
-              <EndIcon className="-mr-1 hidden h-5 w-5 ltr:ml-2 rtl:-ml-1 rtl:mr-2 sm:inline" />
-              <Icon.FiPlus className="inline h-6 w-6 sm:hidden" />
+              <Icon name={EndIcon} className="-mr-1 me-2 ms-2 hidden h-5 w-5 md:inline" />
+              <Icon name="plus" data-testid="plus" className="inline h-6 w-6 md:hidden" />
             </>
           ) : (
-            <EndIcon className="inline h-5 w-5 ltr:-mr-1 ltr:ml-2 rtl:mr-2" />
+            <Icon
+              name={EndIcon}
+              className={classNames(
+                loading ? "invisible" : "visible",
+                "group-active:translate-y-[0.5px]",
+                variant === "icon" && "h-4 w-4",
+                variant === "button" && "h-4 w-4 stroke-[1.5px] "
+              )}
+            />
           )}
         </>
       )}
@@ -229,18 +332,48 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, ButtonPr
   );
 
   return props.href ? (
-    <Link passHref href={props.href} shallow={shallow && shallow}>
+    <Link data-testid="link-component" passHref href={props.href} shallow={shallow && shallow} legacyBehavior>
       {element}
     </Link>
   ) : (
-    <Wrapper tooltip={props.tooltip}>{element}</Wrapper>
+    <Wrapper
+      data-testid="wrapper"
+      tooltip={props.tooltip}
+      tooltipSide={tooltipSide}
+      tooltipOffset={tooltipOffset}
+      tooltipClassName={tooltipClassName}>
+      {element}
+    </Wrapper>
   );
 });
 
-const Wrapper = ({ children, tooltip }: { tooltip?: string; children: React.ReactNode }) => {
+const Wrapper = ({
+  children,
+  tooltip,
+  tooltipSide,
+  tooltipOffset,
+  tooltipClassName,
+}: {
+  tooltip?: string | React.ReactNode;
+  children: React.ReactNode;
+  tooltipSide?: "top" | "right" | "bottom" | "left";
+  tooltipOffset?: number;
+  tooltipClassName?: string;
+}) => {
   if (!tooltip) {
     return <>{children}</>;
   }
 
-  return <Tooltip content={tooltip}>{children}</Tooltip>;
+  return (
+    <Tooltip
+      data-testid="tooltip"
+      className={tooltipClassName}
+      content={tooltip}
+      side={tooltipSide}
+      sideOffset={tooltipOffset}>
+      {children}
+    </Tooltip>
+  );
 };
+
+Button.displayName = "Button";

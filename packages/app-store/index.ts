@@ -1,57 +1,66 @@
-// import * as example from "./_example";
-import * as applecalendar from "./applecalendar";
-import * as caldavcalendar from "./caldavcalendar";
-import * as closecom from "./closecom";
-import * as dailyvideo from "./dailyvideo";
-import * as exchange2013calendar from "./exchange2013calendar";
-import * as exchange2016calendar from "./exchange2016calendar";
-import * as exchangecalendar from "./exchangecalendar";
-import * as giphy from "./giphy";
-import * as googlecalendar from "./googlecalendar";
-import * as googlevideo from "./googlevideo";
-import * as hubspot from "./hubspot";
-import * as huddle01video from "./huddle01video";
-import * as jitsivideo from "./jitsivideo";
-import * as larkcalendar from "./larkcalendar";
-import * as office365calendar from "./office365calendar";
-import * as office365video from "./office365video";
-import * as plausible from "./plausible";
-import * as salesforce from "./salesforce";
-import * as sendgrid from "./sendgrid";
-import * as stripepayment from "./stripepayment";
-import * as tandemvideo from "./tandemvideo";
-import * as vital from "./vital";
-import * as wipemycalother from "./wipemycalother";
-import * as zapier from "./zapier";
-import * as zoomvideo from "./zoomvideo";
-
 const appStore = {
-  //   example,
-  applecalendar,
-  caldavcalendar,
-  closecom,
-  dailyvideo,
-  googlecalendar,
-  googlevideo,
-  hubspot,
-  huddle01video,
-  jitsivideo,
-  larkcalendar,
-  office365calendar,
-  office365video,
-  plausible,
-  salesforce,
-  sendgrid,
-  stripepayment,
-  tandemvideo,
-  vital,
-  zoomvideo,
-  wipemycalother,
-  giphy,
-  zapier,
-  exchange2013calendar,
-  exchange2016calendar,
-  exchangecalendar,
+  alby: createCachedImport(() => import("./alby")),
+  applecalendar: createCachedImport(() => import("./applecalendar")),
+  aroundvideo: createCachedImport(() => import("./around")),
+  caldavcalendar: createCachedImport(() => import("./caldavcalendar")),
+  closecom: createCachedImport(() => import("./closecom")),
+  dailyvideo: createCachedImport(() => import("./dailyvideo")),
+  googlecalendar: createCachedImport(() => import("./googlecalendar")),
+  googlevideo: createCachedImport(() => import("./googlevideo")),
+  hubspot: createCachedImport(() => import("./hubspot")),
+  huddle01video: createCachedImport(() => import("./huddle01video")),
+  "ics-feedcalendar": createCachedImport(() => import("./ics-feedcalendar")),
+  jellyconferencing: createCachedImport(() => import("./jelly")),
+  jitsivideo: createCachedImport(() => import("./jitsivideo")),
+  larkcalendar: createCachedImport(() => import("./larkcalendar")),
+  nextcloudtalkvideo: createCachedImport(() => import("./nextcloudtalk")),
+  office365calendar: createCachedImport(() => import("./office365calendar")),
+  office365video: createCachedImport(() => import("./office365video")),
+  plausible: createCachedImport(() => import("./plausible")),
+  paypal: createCachedImport(() => import("./paypal")),
+  "pipedrive-crm": createCachedImport(() => import("./pipedrive-crm")),
+  salesforce: createCachedImport(() => import("./salesforce")),
+  zohocrm: createCachedImport(() => import("./zohocrm")),
+  sendgrid: createCachedImport(() => import("./sendgrid")),
+  stripepayment: createCachedImport(() => import("./stripepayment")),
+  tandemvideo: createCachedImport(() => import("./tandemvideo")),
+  vital: createCachedImport(() => import("./vital")),
+  zoomvideo: createCachedImport(() => import("./zoomvideo")),
+  wipemycalother: createCachedImport(() => import("./wipemycalother")),
+  webexvideo: createCachedImport(() => import("./webex")),
+  giphy: createCachedImport(() => import("./giphy")),
+  zapier: createCachedImport(() => import("./zapier")),
+  make: createCachedImport(() => import("./make")),
+  exchange2013calendar: createCachedImport(() => import("./exchange2013calendar")),
+  exchange2016calendar: createCachedImport(() => import("./exchange2016calendar")),
+  exchangecalendar: createCachedImport(() => import("./exchangecalendar")),
+  facetime: createCachedImport(() => import("./facetime")),
+  sylapsvideo: createCachedImport(() => import("./sylapsvideo")),
+  zohocalendar: createCachedImport(() => import("./zohocalendar")),
+  "zoho-bigin": createCachedImport(() => import("./zoho-bigin")),
+  basecamp3: createCachedImport(() => import("./basecamp3")),
+  telegramvideo: createCachedImport(() => import("./telegram")),
+  shimmervideo: createCachedImport(() => import("./shimmervideo")),
+  hitpay: createCachedImport(() => import("./hitpay")),
 };
 
-export default appStore;
+function createCachedImport<T>(importFunc: () => Promise<T>): () => Promise<T> {
+  let cachedModule: T | undefined;
+
+  return async () => {
+    if (!cachedModule) {
+      cachedModule = await importFunc();
+    }
+    return cachedModule;
+  };
+}
+
+const exportedAppStore: typeof appStore & {
+  ["mock-payment-app"]?: () => Promise<typeof import("./mock-payment-app/index")>;
+} = appStore;
+
+if (process.env.MOCK_PAYMENT_APP_ENABLED !== undefined) {
+  exportedAppStore["mock-payment-app"] = createCachedImport(() => import("./mock-payment-app/index"));
+}
+
+export default exportedAppStore;

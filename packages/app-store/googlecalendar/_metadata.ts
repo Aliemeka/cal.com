@@ -9,20 +9,21 @@ export const metadata = {
   installed: !!(process.env.GOOGLE_API_CREDENTIALS && validJson(process.env.GOOGLE_API_CREDENTIALS)),
   type: "google_calendar",
   title: "Google Calendar",
-  imageSrc: "/api/app-store/googlecalendar/icon.svg",
   variant: "calendar",
   category: "calendar",
   categories: ["calendar"],
-  logo: "/api/app-store/googlecalendar/icon.svg",
+  logo: "icon.svg",
   publisher: "Cal.com",
-  rating: 5,
-  reviews: 69,
   slug: "google-calendar",
-  trending: false,
   url: "https://cal.com/",
-  verified: true,
   email: "help@cal.com",
   dirName: "googlecalendar",
+  isOAuth: true,
+  delegationCredential: {
+    // This is unused at the moment but should be used in future
+    // For now, we have hardcoded imports in the codebase that are supported with Google Workspace(i.e. Google Calendar and Google Meet)
+    workspacePlatformSlug: "google",
+  },
 } as AppMeta;
 
 export default metadata;

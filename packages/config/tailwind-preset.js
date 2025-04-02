@@ -1,181 +1,254 @@
 const plugin = require("tailwindcss/plugin");
+const { fontFamily } = require("tailwindcss/defaultTheme");
+const colors = require("tailwindcss/colors");
 
 /** @type {import('tailwindcss').Config} */
-
+const subtleColor = "#E5E7EB";
 module.exports = {
   content: [
-    "./pages/**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}",
-    "../../packages/app-store/**/{components,pages}/**/*.{js,ts,jsx,tsx}",
-    "../../packages/features/**/*.{js,ts,jsx,tsx}",
-    "../../packages/ui/**/*.{js,ts,jsx,tsx}",
+    "../../apps/web/pages/**/*.{js,ts,jsx,tsx}",
+    "../../apps/web/app/**/*.{js,ts,jsx,tsx}",
+    "../../apps/web/modules/**/*.{js,ts,jsx,tsx}",
+    "../../apps/web/components/**/*.{js,ts,jsx,tsx}",
+    "../../packages/app-store/!(node_modules)/**/*{components,pages}/**/*.{js,ts,jsx,tsx}",
+    "../../packages/features/!(node_modules)/**/*.{js,ts,jsx,tsx}",
+    "../../packages/ui/!(node_modules)/**/*.{js,ts,jsx,tsx}",
+    "../../packages/platform/atoms/!(node_modules)/**/*.{js,ts,jsx,tsx}",
   ],
   darkMode: "class",
   theme: {
-    fontFamily: {
-      cal: ['"Cal Sans"', "sans-serif"],
-      sans: ['"Inter var"', "sans-serif"],
+    spacing: {
+      0: "var(--cal-spacing-0)",
+      px: "var(--cal-spacing-px)",
+      0.5: "var(--cal-spacing-0_5)",
+      1: "var(--cal-spacing-1)",
+      1.5: "var(--cal-spacing-1_5)",
+      2: "var(--cal-spacing-2)",
+      2.5: "var(--cal-spacing-2_5)",
+      3: "var(--cal-spacing-3)",
+      3.5: "var(--cal-spacing-3_5)",
+      4: "var(--cal-spacing-4)",
+      5: "var(--cal-spacing-5)",
+      6: "var(--cal-spacing-6)",
+      7: "var(--cal-spacing-7)",
+      8: "var(--cal-spacing-8)",
+      9: "var(--cal-spacing-9)",
+      10: "var(--cal-spacing-10)",
+      11: "var(--cal-spacing-11)",
+      12: "var(--cal-spacing-12)",
+      14: "var(--cal-spacing-14)",
+      16: "var(--cal-spacing-16)",
+      20: "var(--cal-spacing-20)",
+      24: "var(--cal-spacing-24)",
+      28: "var(--cal-spacing-28)",
+      32: "var(--cal-spacing-32)",
+      36: "var(--cal-spacing-36)",
+      40: "var(--cal-spacing-40)",
+      44: "var(--cal-spacing-44)",
+      48: "var(--cal-spacing-48)",
+      52: "var(--cal-spacing-52)",
+      56: "var(--cal-spacing-56)",
+      60: "var(--cal-spacing-60)",
+      64: "var(--cal-spacing-64)",
+      72: "var(--cal-spacing-72)",
+      80: "var(--cal-spacing-80)",
+      96: "var(--cal-spacing-96)",
+    },
+    borderRadius: {
+      none: "var(--cal-radius-none)",
+      sm: "var(--cal-radius-sm)",
+      DEFAULT: "var(--cal-radius)",
+      md: "var(--cal-radius-md)",
+      lg: "var(--cal-radius-lg)",
+      xl: "var(--cal-radius-xl)",
+      "2xl": "var(--cal-radius-2xl)",
+      "3xl": "var(--cal-radius-3xl)",
+      full: "var(--cal-radius-full)",
     },
     extend: {
       colors: {
-        /* your primary brand color */
-        brandcontrast: "var(--brand-text-color)",
-        darkmodebrand: "var(--brand-color-dark-mode)",
-        darkmodebrandcontrast: "var(--brand-text-color-dark-mode)",
-        bookinglightest: "var(--booking-lightest-color)",
-        bookinglighter: "var(--booking-lighter-color)",
-        bookinglight: "var(--booking-light-color)",
-        bookingmedian: "var(--booking-median-color)",
-        bookingdark: "var(--booking-dark-color)",
-        bookingdarker: "var(--booking-darker-color)",
-        bookinghighlight: "var(--booking-highlight-color)",
-        black: "#111111",
-        brand: {
-          // Figure out a way to automate this for self hosted users
-          // Goto https://javisperez.github.io/tailwindcolorshades to generate your brand color
-          50: "#d1d5db",
-          100: "#9ca3af",
-          200: "#6b7280",
-          300: "#4b5563",
-          400: "#374151",
-          500: "#111827", // Brand color
-          600: "#0f1623",
-          700: "#0d121d",
-          800: "#0a0e17",
-          900: "#080c13",
-          DEFAULT: "var(--brand-color)",
-        },
-        gray: {
-          50: "#F9FAFB",
-          100: "#F3F4F6",
-          200: "#E5E7EB",
-          300: "#D1D5DB",
-          400: "#9CA3AF",
-          500: "#6B7280",
-          600: "#4B5563",
-          700: "#374151",
-          800: "#1F2937",
-          900: "#111827",
-        },
-        neutral: {
-          50: "#F8F8F8",
-          100: "#F5F5F5",
-          200: "#E1E1E1",
-          300: "#CFCFCF",
-          400: "#ACACAC",
-          500: "#888888",
-          600: "#494949",
-          700: "#3E3E3E",
-          800: "#313131",
-          900: "#292929",
-        },
+        // Standard Background
+        emphasis: "var(--cal-bg-emphasis)",
+        default: "var(--cal-bg, white)",
+        subtle: "var(--cal-bg-subtle)",
+        muted: "var(--cal-bg-muted)",
+        inverted: "var(--cal-bg-inverted)",
+
+        // Primary Background
         primary: {
-          50: "#F4F4F4",
-          100: "#E8E8E8",
-          200: "#C6C6C6",
-          300: "#A3A3A3",
-          400: "#5F5F5F",
-          500: "#1A1A1A",
-          600: "#171717",
-          700: "#141414",
-          800: "#101010",
-          900: "#0D0D0D",
+          default: "var(--cal-bg-primary)",
+          emphasis: "var(--cal-bg-primary-emphasis)",
+          muted: "var(--cal-bg-primary-muted)",
         },
-        secondary: {
-          50: "#F5F8F7",
-          100: "#EBF0F0",
-          200: "#CDDAD9",
-          300: "#AEC4C2",
-          400: "#729894",
-          500: "#356C66",
-          600: "#30615C",
-          700: "#28514D",
-          800: "#20413D",
-          900: "#223B41",
+
+        // Brand
+        brand: {
+          default: "var(--cal-brand,#111827)",
+          emphasis: "var(--cal-brand-emphasis,#101010)",
+          subtle: "var(--cal-brand-subtle,#9CA3AF)",
+          accent: "var(--cal-brand-accent,white)",
         },
-        red: {
-          50: "#FFF5F5",
-          100: "#FFE3E2",
-          200: "#FFC9C9",
-          300: "#FEA8A8",
-          400: "#FF8787",
-          500: "#FF6B6B",
-          600: "#FA5352",
-          700: "#F03E3F",
-          800: "#E03130",
-          900: "#C92B2B",
+
+        // Semantic Background
+        semantic: {
+          info: {
+            subtle: "var(--cal-bg-semantic-info-subtle)",
+            emphasis: "var(--cal-bg-semantic-info-emphasis)",
+          },
+          success: {
+            subtle: "var(--cal-bg-semantic-success-subtle)",
+            emphasis: "var(--cal-bg-semantic-success-emphasis)",
+          },
+          attention: {
+            subtle: "var(--cal-bg-semantic-attention-subtle)",
+            emphasis: "var(--cal-bg-semantic-attention-emphasis)",
+          },
+          error: {
+            subtle: "var(--cal-bg-semantic-error-subtle)",
+            emphasis: "var(--cal-bg-semantic-error-emphasis)",
+          },
         },
-        orange: {
-          50: "#FFF4E5",
-          100: "#FFE8CC",
-          200: "#FFD8A8",
-          300: "#FFBF78",
-          400: "#FFA94E",
-          500: "#FF922B",
-          600: "#FD7E14",
-          700: "#F76706",
-          800: "#E8580C",
-          900: "#D94810",
+
+        // Visualization Background
+        visualization: {
+          1: {
+            subtle: "var(--cal-bg-visualization-1-subtle)",
+            emphasis: "var(--cal-bg-visualization-1-emphasis)",
+          },
+          2: {
+            subtle: "var(--cal-bg-visualization-2-subtle)",
+            emphasis: "var(--cal-bg-visualization-2-emphasis)",
+          },
+          3: {
+            subtle: "var(--cal-bg-visualization-3-subtle)",
+            emphasis: "var(--cal-bg-visualization-3-emphasis)",
+          },
+          4: {
+            subtle: "var(--cal-bg-visualization-4-subtle)",
+            emphasis: "var(--cal-bg-visualization-4-emphasis)",
+          },
+          5: {
+            subtle: "var(--cal-bg-visualization-5-subtle)",
+            emphasis: "var(--cal-bg-visualization-5-emphasis)",
+          },
+          6: {
+            subtle: "var(--cal-bg-visualization-6-subtle)",
+            emphasis: "var(--cal-bg-visualization-6-emphasis)",
+          },
+          7: {
+            subtle: "var(--cal-bg-visualization-7-subtle)",
+            emphasis: "var(--cal-bg-visualization-7-emphasis)",
+          },
         },
-        green: {
-          50: "#EBFCEE",
-          100: "#D2F9D9",
-          200: "#B1F2BA",
-          300: "#8CE99A",
-          400: "#69DB7C",
-          500: "#51CF66",
-          600: "#40C057",
-          700: "#36B24D",
-          800: "#2F9E44",
-          900: "#2B8A3E",
+
+        // Legacy - Consider deprecating
+        info: "var(--cal-bg-info)",
+        success: "var(--cal-bg-success)",
+        attention: "var(--cal-bg-attention)",
+        error: "var(--cal-bg-error)",
+        darkerror: "var(--cal-bg-dark-error)",
+
+        // Base colors
+        black: "#111111",
+        gray: colors.gray,
+        darkgray: colors.slate,
+      },
+      borderColor: {
+        // Standard Borders
+        emphasis: "var(--cal-border-emphasis)",
+        default: "var(--cal-border)",
+        subtle: "var(--cal-border-subtle)",
+        muted: "var(--cal-border-muted)",
+
+        // Semantic Borders
+        semantic: {
+          error: "var(--cal-border-semantic-error)",
+          "attention-subtle": "var(--cal-border-semantic-attention-subtle)",
+          "error-subtle": "var(--cal-border-semantic-error-subtle)",
         },
-        blue: {
-          50: "#E7F5FF",
-          100: "#D0EBFF",
-          200: "#A4D8FF",
-          300: "#74C0FC",
-          400: "#4DABF7",
-          500: "#339AF0",
-          600: "#238BE6",
-          700: "#1C7ED7",
-          800: "#1971C2",
-          900: "#1763AB",
+
+        // Used in booker embed customization
+        booker: `var(--cal-border-booker, ${subtleColor})`,
+        // Legacy - Consider deprecating
+        error: "var(--cal-border-error)",
+        "cal-bg": "var(--cal-bg)",
+        "cal-bg-muted": "var(--cal-bg-muted)",
+      },
+      textColor: {
+        // Standard Text
+        emphasis: "var(--cal-text-emphasis)",
+        default: "var(--cal-text)",
+        subtle: "var(--cal-text-subtle)",
+        muted: "var(--cal-text-muted)",
+        inverted: "var(--cal-text-inverted)",
+
+        // Semantic Text
+        semantic: {
+          info: "var(--cal-text-semantic-info)",
+          success: "var(--cal-text-semantic-success)",
+          attention: "var(--cal-text-semantic-attention)",
+          error: "var(--cal-text-semantic-error)",
         },
-        darkgray: {
-          50: "#101010",
-          100: "#1c1c1c",
-          200: "#2b2b2b",
-          300: "#444444",
-          400: "#575757",
-          500: "#767676",
-          600: "#a5a5a5",
-          700: "#d6d6d6",
-          800: "#e8e8e8",
-          900: "#f3f4f6",
-        },
+
+        // Semantic Text Emphasis
+        "semantic-info-emphasis": "var(--cal-text-semantic-info-emphasis)",
+        "semantic-success-emphasis": "var(--cal-text-semantic-success-emphasis)",
+        "semantic-attention-emphasis": "var(--cal-text-semantic-attention-emphasis)",
+        "semantic-error-emphasis": "var(--cal-text-semantic-error-emphasis)",
+
+        // Legacy - Consider deprecating
+        info: "var(--cal-text-info)",
+        success: "var(--cal-text-success)",
+        attention: "var(--cal-text-attention)",
+        error: "var(--cal-text-error)",
+        brand: "var(--cal-brand-text)",
+      },
+      fill: {
+        emphasis: "var(--cal-text-emphasis, #111827)",
+        default: "var(--cal-text, #374151)",
+        subtle: "var(--cal-text-subtle, #6B7280)",
+        muted: "var(--cal-text-muted, #9CA3AF)",
+        inverted: "var(--cal-text-inverted, white)",
+        info: "var(--cal-text-info, #253985)",
+        success: "var(--cal-text-success, #285231)",
+        attention: "var(--cal-text-attention, #73321B)",
+        error: "var(--cal-text-error, #752522)",
+        brand: "var(--cal-brand-text)",
+      },
+      screens: {
+        pwa: { raw: "(display-mode: standalone)" },
       },
       keyframes: {
         "fade-in-up": {
-          "0%": {
-            opacity: 0.75,
-            transform: "translateY(20px)",
-          },
-          "100%": {
-            opacity: 1,
-            transform: "translateY(0)",
-          },
+          from: { opacity: 0, transform: "translateY(10px)" },
+          to: { opacity: 1, transform: "none" },
+        },
+        spinning: {
+          "100%": { transform: "rotate(360deg)" },
+        },
+        drawerSlideLeftAndFade: {
+          from: { opacity: "0", transform: "translateX(100%)" },
+          to: { opacity: "1", transform: "translateX(0)" },
+        },
+        drawerSlideRightAndFade: {
+          from: { opacity: "1", transform: "translateX(0)" },
+          to: { opacity: "0", transform: "translateX(100%)" },
         },
       },
       animation: {
-        "fade-in-up": "fade-in-up 0.35s cubic-bezier(.21,1.02,.73,1)",
+        "fade-in-up": "fade-in-up 600ms var(--animation-delay, 0ms) cubic-bezier(.21,1.02,.73,1) forwards",
+        "fade-in-bottom": "fade-in-bottom cubic-bezier(.21,1.02,.73,1) forwards",
+        spinning: "spinning 0.75s linear infinite",
+        drawerSlideLeftAndFade: "drawerSlideLeftAndFade 150ms cubic-bezier(0.16, 1, 0.3, 1)",
+        drawerSlideRightAndFade: "drawerSlideRightAndFade 150ms ease-in",
       },
-      boxShadow: {
-        dropdown: "0px 2px 6px -1px rgba(0, 0, 0, 0.08)",
+      borderWidth: {
+        "booker-width": "var(--cal-border-booker-width, 1px)",
       },
       fontFamily: {
-        cal: ['"Cal Sans"', "sans-serif"],
+        cal: ["var(--font-cal)", ...fontFamily.serif],
+        sans: ["var(--font-inter)", ...fontFamily.sans],
         mono: ["Roboto Mono", "monospace"],
-        sans: ['"Inter var"', "sans-serif"],
       },
       maxHeight: (theme) => ({
         0: "0",
@@ -206,21 +279,65 @@ module.exports = {
       backgroundImage: {
         "gradient-primary": "radial-gradient(162.05% 170% at 109.58% 35%, #667593 0%, #E3E3E3 100%)",
       },
+      boxShadow: {
+        dropdown: "0px 5px 20px 0px rgba(0, 0, 0, 0.10), 0px 10px 40px 0px rgba(0, 0, 0, 0.03)",
+        "switch-thumb": "0px 0.8px 0.8px 0px rgba(0, 0, 0, 0.10), 0px 0.8px 3.2px 0px rgba(0, 0, 0, 0.08)",
+        "solid-gray-rested":
+          "0px 2px 3px 0px rgba(0, 0, 0, 0.06), 0px 1px 1px 0px rgba(0, 0, 0, 0.08), 1px 4px 8px 0px rgba(0, 0, 0, 0.12), 0px 2px 0.4px 0px rgba(255, 255, 255, 0.16) inset, 0px -1.5px 2px 0px rgba(0, 0, 0, 0.40) inset",
+        "solid-gray-hover":
+          "0px 2px 3px 0px rgba(0, 0, 0, 0.06), 0px 1px 1px 0px rgba(0, 0, 0, 0.08), 1px 4px 8px 0px rgba(0, 0, 0, 0.12), 0px 2px 0.4px 0px rgba(255, 255, 255, 0.16) inset, 0px -2px 2px 0px rgba(0, 0, 0, 0.40) inset",
+        "solid-gray-active":
+          "0px 2px 3px 0px rgba(0, 0, 0, 0.40) inset, 0px 0px 2px 1px rgba(0, 0, 0, 0.40) inset",
+        "outline-gray-rested": "0px 2px 3px 0px rgba(0, 0, 0, 0.03), 0px 2px 2px -1px rgba(0, 0, 0, 0.03)",
+        "outline-gray-hover": "0px 2px 3px 0px rgba(0, 0, 0, 0.03), 0px 2px 2px -1px rgba(0, 0, 0, 0.03)",
+        "outline-gray-active": "0px 2px 1px 0px rgba(0, 0, 0, 0.05) inset",
+        "outline-gray-focused":
+          "0px 0px 0px 1px rgba(255, 255, 255, 0.20), 0px 0px 0px 2px rgba(0, 0, 0, 0.10)",
+        "outline-red-rested": "0px 2px 3px 0px rgba(0, 0, 0, 0.03), 0px 2px 2px -1px rgba(0, 0, 0, 0.03)",
+        "outline-red-hover": "0px 1px 1px 0px rgba(0, 0, 0, 0.06), 0px 2px 3px 0px rgba(0, 0, 0, 0.08)",
+        "outline-red-active":
+          "0px 1px 1px 0px rgba(127, 29, 29, 0.06), 0px 0px 3px 0px rgba(127, 29, 29, 0.08), 0px 2px 2px 1px rgba(127, 29, 29, 0.06) inset",
+        "elevation-low":
+          "0px 1px 1px 0px rgba(0, 0, 0, 0.07), 0px 1px 2px 0px rgba(0, 0, 0, 0.08), 0px 2px 2px 0px rgba(0, 0, 0, 0.10), 0px 0px 8px 0px rgba(0, 0, 0, 0.05)",
+        // Brand
+        "button-solid-brand-default":
+          " 0px 2px 3px 0px rgba(0, 0, 0, 0.06), 0px 1px 1px 0px rgba(0, 0, 0, 0.08), 1px 4px 8px 0px rgba(0, 0, 0, 0.12), 0px 2px 0.4px 0px rgba(255, 255, 255, 0.12) inset, 0px -3px 2px 0px rgba(0, 0, 0, 0.04) inset;",
+        "button-solid-brand-hover":
+          "0px 1px 1px 0px rgba(0, 0, 0, 0.10), 0px 2px 3px 0px rgba(0, 0, 0, 0.08), 1px 4px 8px 0px rgba(0, 0, 0, 0.12), 0px -3px 2px 0px rgba(0, 0, 0, 0.10) inset, 0px 2px 0.4px 0px rgba(255, 255, 255, 0.24) inset",
+        "button-solid-brand-active":
+          "0px 3px 1px 0px rgba(0, 0, 0, 0.10) inset, 0px 0px 2px 0px rgba(0, 0, 0, 0.10) inset",
+        "button-solid-brand-focused":
+          "0px 0px 0px 1px rgba(255, 255, 255, 0.40), 0px 0px 0px 2px rgba(0, 0, 0, 0.20), 0px 1px 1px 0px rgba(0, 0, 0, 0.10), 0px 2px 3px 0px rgba(0, 0, 0, 0.08), 1px 4px 8px 0px rgba(0, 0, 0, 0.12), 0px -3px 2px 0px rgba(0, 0, 0, 0.10) inset, 0px 2px 0.4px 0px rgba(255, 255, 255, 0.24) inset",
+        // Outline - red
+        "button-outline-red-focused":
+          "0px 0px 0px 1px rgba(255, 255, 255, 0.32), 0px 0px 0px 2px rgba(220, 38, 38, 0.15)",
+      },
     },
   },
   plugins: [
+    require("@todesktop/tailwind-variants"),
     require("@tailwindcss/forms"),
     require("@tailwindcss/typography"),
-    require("@tailwindcss/line-clamp"),
-    require("tailwind-scrollbar"),
+    require("tailwind-scrollbar")({ nocompatible: true }),
     require("tailwindcss-radix")(),
+    require("@savvywombat/tailwindcss-grid-areas"),
     plugin(({ addVariant }) => {
       addVariant("mac", ".mac &");
       addVariant("windows", ".windows &");
       addVariant("ios", ".ios &");
     }),
+    plugin(({ addBase, theme }) => {
+      addBase({
+        hr: {
+          borderColor: theme("subtle"),
+        },
+      });
+    }),
+    plugin(function ({ addVariant }) {
+      addVariant("enabled", "&:not(:disabled)");
+    }),
   ],
   variants: {
-    scrollbar: ["rounded", "dark"],
+    scrollbar: ["dark"],
   },
 };

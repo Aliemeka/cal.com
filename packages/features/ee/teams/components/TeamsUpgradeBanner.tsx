@@ -1,13 +1,19 @@
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import { trpc } from "@calcom/trpc/react";
-import { showToast, TopBanner } from "@calcom/ui";
+import type { RouterOutputs } from "@calcom/trpc/react";
+import { TopBanner } from "@calcom/ui/components/top-banner";
+import { showToast } from "@calcom/ui/components/toast";
 
-export function TeamsUpgradeBanner() {
+export type TeamsUpgradeBannerProps = {
+  data: RouterOutputs["viewer"]["me"]["getUserTopBanners"]["teamUpgradeBanner"];
+};
+
+export function TeamsUpgradeBanner({ data }: TeamsUpgradeBannerProps) {
   const { t } = useLocale();
   const router = useRouter();
-  const { data } = trpc.viewer.teams.getUpgradeable.useQuery();
+
   const publishTeamMutation = trpc.viewer.teams.publish.useMutation({
     onSuccess(data) {
       router.push(data.url);
@@ -31,7 +37,7 @@ export function TeamsUpgradeBanner() {
           onClick={() => {
             publishTeamMutation.mutate({ teamId: membership.team.id });
           }}>
-          {t("team_upgrade_banner_action")}
+          {t("upgrade_banner_action")}
         </button>
       }
     />

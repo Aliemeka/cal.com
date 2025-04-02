@@ -1,22 +1,23 @@
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
+import { Dialog } from "@calcom/features/components/controlled-dialog";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import { HttpError } from "@calcom/lib/http-error";
 import { trpc } from "@calcom/trpc/react";
-import {
-  Button,
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogTrigger,
-  Form,
-  Icon,
-  showToast,
-} from "@calcom/ui";
+import { Button } from "@calcom/ui/components/button";
+import { DialogContent, DialogFooter, DialogTrigger, DialogClose } from "@calcom/ui/components/dialog";
+import { Form } from "@calcom/ui/components/form";
+import { InputField } from "@calcom/ui/components/form";
+import { showToast } from "@calcom/ui/components/toast";
 
-export function NewScheduleButton({ name = "new-schedule" }: { name?: string }) {
+export function NewScheduleButton({
+  name = "new-schedule",
+  fromEventType,
+}: {
+  name?: string;
+  fromEventType?: boolean;
+}) {
   const router = useRouter();
   const { t } = useLocale();
 
@@ -24,11 +25,11 @@ export function NewScheduleButton({ name = "new-schedule" }: { name?: string }) 
     name: string;
   }>();
   const { register } = form;
-  const utils = trpc.useContext();
+  const utils = trpc.useUtils();
 
   const createMutation = trpc.viewer.availability.schedule.create.useMutation({
     onSuccess: async ({ schedule }) => {
-      await router.push("/availability/" + schedule.id);
+      await router.push(`/availability/${schedule.id}${fromEventType ? "?fromEventType=true" : ""}`);
       showToast(t("schedule_created_successfully", { scheduleName: schedule.name }), "success");
       utils.viewer.availability.list.setData(undefined, (data) => {
         const newSchedule = { ...schedule, isDefault: false, availability: [] };
@@ -49,7 +50,7 @@ export function NewScheduleButton({ name = "new-schedule" }: { name?: string }) 
       }
 
       if (err.data?.code === "UNAUTHORIZED") {
-        const message = `${err.data.code}: You are not able to create this event`;
+        const message = `${err.data.code}: ${t("error_schedule_unauthorized_create")}`;
         showToast(message, "error");
       }
     },
@@ -58,7 +59,7 @@ export function NewScheduleButton({ name = "new-schedule" }: { name?: string }) 
   return (
     <Dialog name={name} clearQueryParamsOnClose={["copy-schedule-id"]}>
       <DialogTrigger asChild>
-        <Button size="fab" data-testid={name} StartIcon={Icon.FiPlus}>
+        <Button variant="fab" data-testid={name} StartIcon="plus">
           {t("new")}
         </Button>
       </DialogTrigger>
@@ -68,24 +69,17 @@ export function NewScheduleButton({ name = "new-schedule" }: { name?: string }) 
           handleSubmit={(values) => {
             createMutation.mutate(values);
           }}>
-          <div className="space-y-2">
-            <label htmlFor="label" className="block text-sm font-medium text-gray-700">
-              {t("name")}
-            </label>
-            <div className="mt-1">
-              <input
-                type="text"
-                id="name"
-                required
-                className="block w-full rounded-sm border-gray-300 text-sm"
-                placeholder={t("default_schedule_name")}
-                {...register("name")}
-              />
-            </div>
-          </div>
+          <InputField
+            label={t("name")}
+            type="text"
+            id="name"
+            required
+            placeholder={t("default_schedule_name")}
+            {...register("name")}
+          />
           <DialogFooter>
             <DialogClose />
-            <Button type="submit" loading={createMutation.isLoading}>
+            <Button type="submit" loading={createMutation.isPending}>
               {t("continue")}
             </Button>
           </DialogFooter>

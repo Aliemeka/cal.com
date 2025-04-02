@@ -1,221 +1,170 @@
-import dayjs, { Dayjs } from "@calcom/dayjs";
-import { WorkingHours, TimeRange as DateOverride } from "@calcom/types/schedule";
+import type { Dayjs } from "@calcom/dayjs";
+import dayjs from "@calcom/dayjs";
+import type { IFromUser, IOutOfOfficeData, IToUser } from "@calcom/lib/getUserAvailability";
 
-import { getWorkingHours } from "./availability";
+import { getTimeZone } from "./date-fns";
+import type { DateRange } from "./date-ranges";
 
 export type GetSlots = {
   inviteeDate: Dayjs;
   frequency: number;
-  workingHours: WorkingHours[];
-  dateOverrides?: DateOverride[];
+  dateRanges: DateRange[];
   minimumBookingNotice: number;
   eventLength: number;
+  offsetStart?: number;
+  datesOutOfOffice?: IOutOfOfficeData;
 };
 export type TimeFrame = { userIds?: number[]; startTime: number; endTime: number };
 
 const minimumOfOne = (input: number) => (input < 1 ? 1 : input);
 
-/**
- * TODO: What does this function do?
- * Why is it needed?
- */
-const splitAvailableTime = (
-  startTimeMinutes: number,
-  endTimeMinutes: number,
-  frequency: number,
-  eventLength: number
-): TimeFrame[] => {
-  let initialTime = startTimeMinutes;
-  const finalizationTime = endTimeMinutes;
-  const result = [] as TimeFrame[];
-
-  // Ensure that both the frequency and event length are at least 1 minute, if they
-  // would be zero, we would have an infinite loop in this while!
-  const frequencyMinimumOne = minimumOfOne(frequency);
-  const eventLengthMinimumOne = minimumOfOne(eventLength);
-
-  while (initialTime < finalizationTime) {
-    const periodTime = initialTime + frequencyMinimumOne;
-    const slotEndTime = initialTime + eventLengthMinimumOne;
-    /*
-    check if the slot end time surpasses availability end time of the user
-    1 minute is added to round up the hour mark so that end of the slot is considered in the check instead of x9
-    eg: if finalization time is 11:59, slotEndTime is 12:00, we ideally want the slot to be available
-    */
-    if (slotEndTime <= finalizationTime + 1) result.push({ startTime: initialTime, endTime: periodTime });
-    // Ensure that both the frequency and event length are at least 1 minute, if they
-    // would be zero, we would have an infinite loop in this while!
-    initialTime += frequencyMinimumOne;
-  }
-  return result;
-};
-
-function buildSlots({
-  startOfInviteeDay,
-  computedLocalAvailability,
+function buildSlotsWithDateRanges({
+  dateRanges,
   frequency,
   eventLength,
-  startDate,
+  timeZone,
+  minimumBookingNotice,
+  offsetStart,
+  datesOutOfOffice,
 }: {
-  computedLocalAvailability: TimeFrame[];
-  startOfInviteeDay: Dayjs;
-  startDate: Dayjs;
+  dateRanges: DateRange[];
   frequency: number;
   eventLength: number;
+  timeZone: string;
+  minimumBookingNotice: number;
+  offsetStart?: number;
+  datesOutOfOffice?: IOutOfOfficeData;
 }) {
-  const slotsTimeFrameAvailable: TimeFrame[] = [];
+  // keep the old safeguards in; may be needed.
+  frequency = minimumOfOne(frequency);
+  eventLength = minimumOfOne(eventLength);
+  offsetStart = offsetStart ? minimumOfOne(offsetStart) : 0;
+  // there can only ever be one slot at a given start time, and based on duration also only a single length.
+  const slots = new Map<
+    string,
+    {
+      time: Dayjs;
+      userIds?: number[];
+      away?: boolean;
+      fromUser?: IFromUser;
+      toUser?: IToUser;
+      reason?: string;
+      emoji?: string;
+    }
+  >();
 
-  computedLocalAvailability.forEach((item) => {
-    const userSlotsTimeFrameAvailable = splitAvailableTime(
-      item.startTime,
-      item.endTime,
-      frequency,
-      eventLength
-    ).map((slot) => ({ ...slot, userIds: item.userIds }));
+  let interval = Number(process.env.NEXT_PUBLIC_AVAILABILITY_SCHEDULE_INTERVAL) || 1;
+  const intervalsWithDefinedStartTimes = [60, 30, 20, 15, 10, 5];
 
-    slotsTimeFrameAvailable.push(...userSlotsTimeFrameAvailable);
-  });
+  for (let i = 0; i < intervalsWithDefinedStartTimes.length; i++) {
+    if (frequency % intervalsWithDefinedStartTimes[i] === 0) {
+      interval = intervalsWithDefinedStartTimes[i];
+      break;
+    }
+  }
 
-  const slots: { [x: string]: { time: Dayjs; userIds?: number[] } } = {};
-  slotsTimeFrameAvailable.forEach((item) => {
-    // XXX: Hack alert, as dayjs is supposedly not aware of timezone the current slot may have invalid UTC offset.
-    const timeZone =
-      (startOfInviteeDay as unknown as { $x: { $timezone: string } })["$x"]["$timezone"] || "UTC";
-    /*
-     * @calcom/web:dev: 2022-11-06T00:00:00-04:00
-     * @calcom/web:dev: 2022-11-06T01:00:00-04:00
-     * @calcom/web:dev: 2022-11-06T01:00:00-04:00 <-- note there is no offset change, but we did lose an hour.
-     * @calcom/web:dev: 2022-11-06T02:00:00-04:00
-     * @calcom/web:dev: 2022-11-06T03:00:00-04:00
-     * ...
-     */
-    const slot = {
-      userIds: item.userIds,
-      time: dayjs.tz(startOfInviteeDay.add(item.startTime, "minute").format("YYYY-MM-DDTHH:mm:ss"), timeZone),
-    };
-    // If the startOfInviteeDay has a different UTC offset than the slot, a DST change has occurred.
-    // As the time has now fallen backwards, or forwards; this difference -
-    // needs to be manually added as this is not done for us. Usually 0.
-    slot.time = slot.time.add(startOfInviteeDay.utcOffset() - slot.time.utcOffset(), "minutes");
+  const startTimeWithMinNotice = dayjs.utc().add(minimumBookingNotice, "minute");
 
-    if (slots[slot.time.format()]) {
-      slots[slot.time.format()] = {
-        ...slot,
-        userIds: [...(slots[slot.time.format()].userIds || []), ...(item.userIds || [])],
+  const orderedDateRanges = dateRanges.sort((a, b) => a.start.valueOf() - b.start.valueOf());
+  orderedDateRanges.forEach((range) => {
+    const dateYYYYMMDD = range.start.format("YYYY-MM-DD");
+
+    let slotStartTime = range.start.utc().isAfter(startTimeWithMinNotice)
+      ? range.start
+      : startTimeWithMinNotice;
+
+    slotStartTime =
+      slotStartTime.minute() % interval !== 0
+        ? slotStartTime.startOf("hour").add(Math.ceil(slotStartTime.minute() / interval) * interval, "minute")
+        : slotStartTime;
+
+    slotStartTime = slotStartTime.add(offsetStart ?? 0, "minutes").tz(timeZone);
+
+    // if the slotStartTime is between an existing slot, we need to adjust to the begin of the existing slot
+    // but that adjusted startTime must be legal.
+    const iterator = slots.keys();
+    let result = iterator.next();
+
+    while (!result.done) {
+      const utcResultValue = dayjs.utc(result.value);
+      // if the slotStartTime is between an existing slot, we need to adjust to the begin of the existing slot
+      if (
+        utcResultValue.isBefore(slotStartTime) &&
+        utcResultValue.add(frequency + (offsetStart ?? 0), "minutes").isAfter(slotStartTime)
+      ) {
+        // however, the slot can now be before the start of this date range.
+        if (!utcResultValue.isBefore(range.start)) {
+          // it is between, if possible floor down to the start of the existing slot
+          slotStartTime = utcResultValue;
+        } else {
+          // if not possible to floor, we need to ceil up to the next slot.
+          slotStartTime = utcResultValue.add(frequency + (offsetStart ?? 0), "minutes");
+        }
+        // and then convert to the correct timezone - UTC mode is just for performance.
+        slotStartTime = slotStartTime.tz(timeZone);
+      }
+      result = iterator.next();
+    }
+    while (!slotStartTime.add(eventLength, "minutes").subtract(1, "second").utc().isAfter(range.end)) {
+      const dateOutOfOfficeExists = datesOutOfOffice?.[dateYYYYMMDD];
+      let slotData: {
+        time: Dayjs;
+        userIds?: number[];
+        away?: boolean;
+        fromUser?: IFromUser;
+        toUser?: IToUser;
+        reason?: string;
+        emoji?: string;
+      } = {
+        time: slotStartTime,
       };
-      return;
+
+      if (dateOutOfOfficeExists) {
+        const { toUser, fromUser, reason, emoji } = dateOutOfOfficeExists;
+
+        slotData = {
+          time: slotStartTime,
+          away: true,
+          ...(fromUser && { fromUser }),
+          ...(toUser && { toUser }),
+          ...(reason && { reason }),
+          ...(emoji && { emoji }),
+        };
+      }
+
+      slots.set(slotData.time.toISOString(), slotData);
+      slotStartTime = slotStartTime.add(frequency + (offsetStart ?? 0), "minutes");
     }
-    // Validating slot its not on the past
-    if (slot.time.isBefore(startDate)) {
-      return;
-    }
-    slots[slot.time.format()] = slot;
   });
 
-  return Object.values(slots);
+  return Array.from(slots.values());
 }
 
 const getSlots = ({
   inviteeDate,
   frequency,
   minimumBookingNotice,
-  workingHours,
-  dateOverrides = [],
+  dateRanges,
   eventLength,
-}: GetSlots) => {
-  // current date in invitee tz
-  const startDate = dayjs().add(minimumBookingNotice, "minute");
-  // This code is ran client side, startOf() does some conversions based on the
-  // local tz of the client. Sometimes this shifts the day incorrectly.
-  const startOfDayUTC = dayjs.utc().set("hour", 0).set("minute", 0).set("second", 0);
-  const startOfInviteeDay = inviteeDate.startOf("day");
-  // checks if the start date is in the past
-
-  /**
-   *  TODO: change "day" for "hour" to stop displaying 1 day before today
-   * This is displaying a day as available as sometimes difference between two dates is < 24 hrs.
-   * But when doing timezones an available day for an owner can be 2 days available in other users tz.
-   *
-   * */
-  if (inviteeDate.isBefore(startDate, "day")) {
-    return [];
-  }
-
-  // Dayjs does not expose the timeZone value publicly through .get("timeZone")
-  // instead, we as devs are required to somewhat hack our way to get the ...
-  // tz value as string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const timeZone: string = (inviteeDate as any)["$x"]["$timezone"];
-
-  const workingHoursUTC = workingHours.map((schedule) => ({
-    userId: schedule.userId,
-    days: schedule.days,
-    startTime: /* Why? */ startOfDayUTC.add(schedule.startTime, "minute"),
-    endTime: /* Why? */ startOfDayUTC.add(schedule.endTime, "minute"),
-  }));
-
-  const localWorkingHours = getWorkingHours(
-    {
-      // initialize current day with timeZone without conversion, just parse.
-      utcOffset: -dayjs.tz(dayjs(), timeZone).utcOffset(),
-    },
-    workingHoursUTC
-  ).filter((hours) => hours.days.includes(inviteeDate.day()));
-
-  // Here we split working hour in chunks for every frequency available that can fit in whole working hours
-  const computedLocalAvailability: TimeFrame[] = [];
-  let tempComputeTimeFrame: TimeFrame | undefined;
-  const computeLength = localWorkingHours.length - 1;
-  const makeTimeFrame = (item: typeof localWorkingHours[0]): TimeFrame => ({
-    userIds: item.userId ? [item.userId] : [],
-    startTime: item.startTime,
-    endTime: item.endTime,
-  });
-
-  localWorkingHours.forEach((item, index) => {
-    if (!tempComputeTimeFrame) {
-      tempComputeTimeFrame = makeTimeFrame(item);
-    } else {
-      // please check the comment in splitAvailableTime func for the added 1 minute
-      if (tempComputeTimeFrame.endTime + 1 === item.startTime) {
-        // to deal with time that across the day, e.g. from 11:59 to to 12:01
-        tempComputeTimeFrame.endTime = item.endTime;
-      } else {
-        computedLocalAvailability.push(tempComputeTimeFrame);
-        tempComputeTimeFrame = makeTimeFrame(item);
-      }
-    }
-    if (index == computeLength) {
-      computedLocalAvailability.push(tempComputeTimeFrame);
-    }
-  });
-  // an override precedes all the local working hour availability logic.
-  const activeOverrides = dateOverrides.filter((override) => {
-    return dayjs.utc(override.start).isBetween(startOfInviteeDay, startOfInviteeDay.endOf("day"), null, "[)");
-  });
-
-  if (!!activeOverrides.length) {
-    const overrides = activeOverrides.flatMap((override) => ({
-      userIds: override.userId ? [override.userId] : [],
-      startTime: override.start.getUTCHours() * 60 + override.start.getUTCMinutes(),
-      endTime: override.end.getUTCHours() * 60 + override.end.getUTCMinutes(),
-    }));
-    overrides.forEach((override) => {
-      const index = computedLocalAvailability.findIndex(
-        (a) => !a.userIds?.length || (override.userIds[0] && a.userIds?.includes(override.userIds[0]))
-      );
-      if (index >= 0) {
-        computedLocalAvailability[index] = override;
-      }
-    });
-  }
-
-  return buildSlots({
-    computedLocalAvailability,
-    startOfInviteeDay,
-    startDate,
+  offsetStart = 0,
+  datesOutOfOffice,
+}: GetSlots): {
+  time: Dayjs;
+  userIds?: number[];
+  away?: boolean;
+  fromUser?: IFromUser;
+  toUser?: IToUser;
+  reason?: string;
+  emoji?: string;
+}[] => {
+  return buildSlotsWithDateRanges({
+    dateRanges,
     frequency,
     eventLength,
+    timeZone: getTimeZone(inviteeDate),
+    minimumBookingNotice,
+    offsetStart,
+    datesOutOfOffice,
   });
 };
 

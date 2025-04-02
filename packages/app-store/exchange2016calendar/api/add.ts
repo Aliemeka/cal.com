@@ -3,7 +3,8 @@ import { z } from "zod";
 
 import { symmetricEncrypt } from "@calcom/lib/crypto";
 import logger from "@calcom/lib/logger";
-import { defaultHandler, defaultResponder } from "@calcom/lib/server";
+import { defaultHandler } from "@calcom/lib/server/defaultHandler";
+import { defaultResponder } from "@calcom/lib/server/defaultResponder";
 import prisma from "@calcom/prisma";
 
 import getInstalledAppPath from "../../_utils/getInstalledAppPath";
@@ -26,13 +27,15 @@ async function postHandler(req: NextApiRequest, res: NextApiResponse) {
     },
     select: {
       id: true,
+      email: true,
     },
   });
 
   const data = {
     type: "exchange2016_calendar",
-    key: symmetricEncrypt(JSON.stringify(body), process.env.CALENDSO_ENCRYPTION_KEY!),
+    key: symmetricEncrypt(JSON.stringify(body), process.env.CALENDSO_ENCRYPTION_KEY || ""),
     userId: user.id,
+    teamId: null,
     appId: "exchange2016-calendar",
     invalid: false,
   };
@@ -40,6 +43,7 @@ async function postHandler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const dav = new CalendarService({
       id: 0,
+      user: { email: user.email },
       ...data,
     });
     await dav?.listCalendars();

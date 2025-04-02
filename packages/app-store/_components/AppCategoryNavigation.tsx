@@ -1,8 +1,8 @@
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { useMemo } from "react";
 
-import { classNames } from "@calcom/lib";
-import { HorizontalTabs, VerticalTabs } from "@calcom/ui";
+import cs from "@calcom/ui/classNames";
+import { HorizontalTabs, VerticalTabs } from "@calcom/ui/components/navigation";
 
 import getAppCategories from "../_utils/getAppCategories";
 
@@ -11,31 +11,34 @@ const AppCategoryNavigation = ({
   children,
   containerClassname,
   className,
-  fromAdmin,
+  classNames,
+  useQueryParam = false,
 }: {
   baseURL: string;
   children: React.ReactNode;
-  containerClassname: string;
+  /** @deprecated use classNames instead */
+  containerClassname?: string;
+  /** @deprecated use classNames instead */
   className?: string;
-  fromAdmin?: boolean;
+  classNames?: {
+    root?: string;
+    container?: string;
+    verticalTabsItem?: string;
+  };
+  useQueryParam?: boolean;
 }) => {
   const [animationRef] = useAutoAnimate<HTMLDivElement>();
-  const appCategories = useMemo(() => getAppCategories(baseURL), [baseURL]);
+  const appCategories = useMemo(() => getAppCategories(baseURL, useQueryParam), [baseURL, useQueryParam]);
 
   return (
-    <div className={classNames("flex flex-col p-2 md:p-0 xl:flex-row", className)}>
+    <div className={cs("flex flex-col xl:flex-row xl:space-x-6", classNames?.root ?? className)}>
       <div className="hidden xl:block">
-        <VerticalTabs
-          tabs={appCategories}
-          sticky
-          linkProps={{ shallow: true }}
-          itemClassname={classNames(fromAdmin && "w-60")}
-        />
+        <VerticalTabs tabs={appCategories} sticky linkShallow itemClassname={classNames?.verticalTabsItem} />
       </div>
-      <div className="mb-4 block overflow-x-scroll xl:hidden">
-        <HorizontalTabs tabs={appCategories} linkProps={{ shallow: true }} />
+      <div className="block overflow-x-scroll xl:hidden">
+        <HorizontalTabs tabs={appCategories} linkShallow />
       </div>
-      <main className={containerClassname} ref={animationRef}>
+      <main className={classNames?.container ?? containerClassname} ref={animationRef}>
         {children}
       </main>
     </div>

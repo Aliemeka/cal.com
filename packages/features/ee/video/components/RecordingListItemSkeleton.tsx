@@ -1,10 +1,10 @@
-import { SkeletonText, SkeletonButton } from "@calcom/ui";
+import { SkeletonText, SkeletonButton } from "@calcom/ui/components/skeleton";
 
 export default function RecordingListItemSkeleton() {
   return (
     <div className="flex w-full justify-between rounded-md border p-2">
       <div>
-        <p className="pt-2 text-sm font-medium text-gray-900">
+        <p className="text-emphasis pt-2 text-sm font-medium">
           <SkeletonText className="h-3 w-56" />
         </p>
         <div className="mt-1 w-max">

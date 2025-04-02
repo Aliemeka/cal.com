@@ -15,11 +15,10 @@ const IV_LENGTH = 16; // AES blocksize
 export const symmetricEncrypt = function (text: string, key: string) {
   const _key = Buffer.from(key, "latin1");
   const iv = crypto.randomBytes(IV_LENGTH);
-
   const cipher = crypto.createCipheriv(ALGORITHM, _key, iv);
   let ciphered = cipher.update(text, INPUT_ENCODING, OUTPUT_ENCODING);
   ciphered += cipher.final(OUTPUT_ENCODING);
-  const ciphertext = iv.toString(OUTPUT_ENCODING) + ":" + ciphered;
+  const ciphertext = `${iv.toString(OUTPUT_ENCODING)}:${ciphered}`;
 
   return ciphertext;
 };

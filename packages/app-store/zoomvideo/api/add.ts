@@ -2,9 +2,11 @@ import type { NextApiRequest } from "next";
 import { stringify } from "querystring";
 
 import { WEBAPP_URL } from "@calcom/lib/constants";
-import { defaultHandler, defaultResponder } from "@calcom/lib/server";
+import { defaultHandler } from "@calcom/lib/server/defaultHandler";
+import { defaultResponder } from "@calcom/lib/server/defaultResponder";
 import prisma from "@calcom/prisma";
 
+import { encodeOAuthState } from "../../_utils/oauth/encodeOAuthState";
 import { getZoomAppKeys } from "../lib";
 
 async function handler(req: NextApiRequest) {
@@ -19,11 +21,13 @@ async function handler(req: NextApiRequest) {
   });
 
   const { client_id } = await getZoomAppKeys();
+  const state = encodeOAuthState(req);
 
   const params = {
     response_type: "code",
     client_id,
-    redirect_uri: WEBAPP_URL + "/api/integrations/zoomvideo/callback",
+    redirect_uri: `${WEBAPP_URL}/api/integrations/zoomvideo/callback`,
+    state,
   };
   const query = stringify(params);
   const url = `https://zoom.us/oauth/authorize?${query}`;

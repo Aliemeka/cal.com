@@ -1,3 +1,5 @@
+import { describe, expect, it } from "vitest";
+
 import { applyStyleToMultipleVariants } from "./cva";
 
 describe("CVA Utils", () => {
@@ -19,7 +21,7 @@ describe("CVA Utils", () => {
     ]);
   });
 
-  it("Should no erorr when no arrays are passed in", () => {
+  it("Should not error when no arrays are passed in", () => {
     const variants = {
       color: "blue",
       size: "large",

@@ -3,7 +3,7 @@ import type { NextApiRequest } from "next";
 import { symmetricEncrypt } from "@calcom/lib/crypto";
 import { HttpError } from "@calcom/lib/http-error";
 import logger from "@calcom/lib/logger";
-import { defaultResponder } from "@calcom/lib/server";
+import { defaultResponder } from "@calcom/lib/server/defaultResponder";
 import prisma from "@calcom/prisma";
 
 import checkSession from "../../_utils/auth";
@@ -15,7 +15,13 @@ export async function getHandler(req: NextApiRequest) {
   const { api_key } = req.body;
   if (!api_key) throw new HttpError({ statusCode: 400, message: "No Api Key provided to check" });
 
-  const encrypted = symmetricEncrypt(JSON.stringify({ api_key }), process.env.CALENDSO_ENCRYPTION_KEY || "");
+  let encrypted;
+  try {
+    encrypted = symmetricEncrypt(JSON.stringify({ api_key }), process.env.CALENDSO_ENCRYPTION_KEY || "");
+  } catch (reason) {
+    logger.error("Could not add Sendgrid app", reason);
+    throw new HttpError({ statusCode: 500, message: "Invalid length - CALENDSO_ENCRYPTION_KEY" });
+  }
 
   const data = {
     type: "sendgrid_other_calendar",

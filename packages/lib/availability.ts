@@ -1,6 +1,7 @@
 import type { Availability } from "@prisma/client";
 
-import dayjs, { ConfigType } from "@calcom/dayjs";
+import type { ConfigType } from "@calcom/dayjs";
+import dayjs from "@calcom/dayjs";
 import type { Schedule, TimeRange, WorkingHours } from "@calcom/types/schedule";
 
 import { nameOfDay } from "./weekday";
@@ -127,17 +128,17 @@ export function getWorkingHours(
 }
 
 export function availabilityAsString(
-  availability: Availability,
+  availability: Pick<Availability, "days" | "startTime" | "endTime">,
   { locale, hour12 }: { locale?: string; hour12?: boolean }
 ) {
-  const weekSpan = (availability: Availability) => {
+  const weekSpan = (availability: Pick<Availability, "days" | "startTime" | "endTime">) => {
     const days = availability.days.slice(1).reduce(
       (days, day) => {
         if (days[days.length - 1].length === 1 && days[days.length - 1][0] === day - 1) {
           // append if the range is not complete (but the next day needs adding)
           days[days.length - 1].push(day);
         } else if (days[days.length - 1][days[days.length - 1].length - 1] === day - 1) {
-          // range complete, overwrite if the last day directly preceeds the current day
+          // range complete, overwrite if the last day directly precedes the current day
           days[days.length - 1] = [days[days.length - 1][0], day];
         } else {
           // new range
@@ -152,17 +153,13 @@ export function availabilityAsString(
       .join(", ");
   };
 
-  const timeSpan = (availability: Availability) => {
-    return (
-      new Intl.DateTimeFormat(locale, { hour: "numeric", minute: "numeric", hour12 }).format(
-        new Date(availability.startTime.toISOString().slice(0, -1))
-      ) +
-      " - " +
-      new Intl.DateTimeFormat(locale, { hour: "numeric", minute: "numeric", hour12 }).format(
-        new Date(availability.endTime.toISOString().slice(0, -1))
-      )
-    );
+  const timeSpan = (availability: Pick<Availability, "days" | "startTime" | "endTime">) => {
+    return `${new Intl.DateTimeFormat(locale, { hour: "numeric", minute: "numeric", hour12 }).format(
+      new Date(availability.startTime.toISOString().slice(0, -1))
+    )} - ${new Intl.DateTimeFormat(locale, { hour: "numeric", minute: "numeric", hour12 }).format(
+      new Date(availability.endTime.toISOString().slice(0, -1))
+    )}`;
   };
 
-  return weekSpan(availability) + ", " + timeSpan(availability);
+  return `${weekSpan(availability)}, ${timeSpan(availability)}`;
 }

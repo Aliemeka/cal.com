@@ -1,19 +1,274 @@
+/* @import rules must precede all rules aside from @charset and @layer statements. */
+@import "./raqb.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/**
+* Add css variables here as well for light mode in addition to tailwind.config to avoid FOUC
+*/
+:root {
+  /* Spacing Scale */
+  --cal-spacing-0: 0px;
+  --cal-spacing-px: 1px;
+  --cal-spacing-0_5: 0.125rem; /* 2px */
+  --cal-spacing-1: 0.25rem; /* 4px */
+  --cal-spacing-1_5: 0.375rem; /* 6px */
+  --cal-spacing-2: 0.5rem; /* 8px */
+  --cal-spacing-2_5: 0.625rem; /* 10px */
+  --cal-spacing-3: 0.75rem; /* 12px */
+  --cal-spacing-3_5: 0.875rem; /* 14px */
+  --cal-spacing-4: 1rem; /* 16px */
+  --cal-spacing-5: 1.25rem; /* 20px */
+  --cal-spacing-6: 1.5rem; /* 24px */
+  --cal-spacing-7: 1.75rem; /* 28px */
+  --cal-spacing-8: 2rem; /* 32px */
+  --cal-spacing-9: 2.25rem; /* 36px */
+  --cal-spacing-10: 2.5rem; /* 40px */
+  --cal-spacing-11: 2.75rem; /* 44px */
+  --cal-spacing-12: 3rem; /* 48px */
+  --cal-spacing-14: 3.5rem; /* 56px */
+  --cal-spacing-16: 4rem; /* 64px */
+  --cal-spacing-20: 5rem; /* 80px */
+  --cal-spacing-24: 6rem; /* 96px */
+  --cal-spacing-28: 7rem; /* 112px */
+  --cal-spacing-32: 8rem; /* 128px */
+  --cal-spacing-36: 9rem; /* 144px */
+  --cal-spacing-40: 10rem; /* 160px */
+  --cal-spacing-44: 11rem; /* 176px */
+  --cal-spacing-48: 12rem; /* 192px */
+  --cal-spacing-52: 13rem; /* 208px */
+  --cal-spacing-56: 14rem; /* 224px */
+  --cal-spacing-60: 15rem; /* 240px */
+  --cal-spacing-64: 16rem; /* 256px */
+  --cal-spacing-72: 18rem; /* 288px */
+  --cal-spacing-80: 20rem; /* 320px */
+  --cal-spacing-96: 24rem; /* 384px */
 
-@import "../../../packages/ui/styles/shared-globals.css";
+  /* Border Radius */
+  --cal-radius-none: 0px;
+  --cal-radius-sm: 0.125rem; /* 2px */
+  --cal-radius: 0.25rem; /* 4px */
+  --cal-radius-md: 0.375rem; /* 6px */
+  --cal-radius-lg: 0.5rem; /* 8px */
+  --cal-radius-xl: 0.75rem; /* 12px */
+  --cal-radius-2xl: 1rem; /* 16px */
+  --cal-radius-3xl: 1.5rem; /* 24px */
+  --cal-radius-full: 9999px;
+
+  /* Background Standard */
+  --cal-bg-emphasis: hsla(220, 13%, 91%, 1); /* gray.200 - active items and emphasising */
+  --cal-bg: hsla(0, 0%, 100%, 1); /* white - default background */
+  --cal-bg-subtle: hsla(220, 14%, 94%, 1); /* gray.100 - hovering on items, subtle raising */
+  --cal-bg-muted: hsla(210, 20%, 97%, 1); /* gray.50 - large items, sidebar, sections */
+  --cal-bg-inverted: hsla(210, 30%, 4%, 1); /* gray.900 - tooltips */
+
+  /* Background Primary */
+  --cal-bg-primary: hsla(214, 30%, 16%, 1); /* stone-100 */
+  --cal-bg-primary-emphasis: hsla(220, 6%, 25%, 1); /* stone-800 */
+  --cal-bg-primary-muted: hsla(220, 14%, 94%, 1); /* stone-400 */
+
+  /* Background Brand */
+  --cal-bg-brand: hsla(214, 30%, 16%, 1); /* gray-50 */
+  --cal-bg-brand-emphasis: hsla(220, 6%, 25%, 1); /* stone-100 */
+  --cal-bg-brand-muted: hsla(220, 14%, 94%, 1); /* stone-100 */
+
+  /* Background Semantic */
+  --cal-bg-semantic-info-subtle: hsla(212, 88%, 97%, 1); /* blue-100 */
+  --cal-bg-semantic-info-emphasis: hsla(236, 80%, 25%, 1); /* blue-500 */
+  --cal-bg-semantic-success-subtle: hsla(167, 54%, 93%, 1); /* green-100 */
+  --cal-bg-semantic-success-emphasis: hsla(158, 74%, 38%, 1); /* green-500 */
+  --cal-bg-semantic-attention-subtle: hsla(34, 100%, 92%, 1); /* orange-100 */
+  --cal-bg-semantic-attention-emphasis: hsla(15, 79%, 34%, 1); /* orange-500 */
+  --cal-bg-semantic-error-subtle: hsla(0, 93%, 94%, 1); /* red-100 */
+  --cal-bg-semantic-error-emphasis: hsla(0, 63%, 24%, 1); /* red-500 */
+
+  /* Background Visualization */
+  --cal-bg-visualization-1-subtle: hsla(326, 78%, 95%, 1); /* pink-100 */
+  --cal-bg-visualization-1-emphasis: hsla(330, 81%, 60%, 1); /* pink-500 */
+  --cal-bg-visualization-2-subtle: hsla(256, 86%, 91%, 1); /* purple-100 */
+  --cal-bg-visualization-2-emphasis: hsla(256, 85%, 57%, 1); /* purple-500 */
+  --cal-bg-visualization-3-subtle: hsla(217, 87%, 91%, 1); /* blue-100 */
+  --cal-bg-visualization-3-emphasis: hsla(235, 100%, 63%, 1); /* blue-500 */
+  --cal-bg-visualization-4-subtle: hsla(167, 54%, 93%, 1); /* green-100 */
+  --cal-bg-visualization-4-emphasis: hsla(158, 74%, 38%, 1); /* green-500 */
+  --cal-bg-visualization-5-subtle: hsla(55, 97%, 88%, 1); /* yellow-100 */
+  --cal-bg-visualization-5-emphasis: hsla(45, 93%, 47%, 1); /* yellow-500 */
+  --cal-bg-visualization-6-subtle: hsla(34, 100%, 92%, 1); /* orange-100 */
+  --cal-bg-visualization-6-emphasis: hsla(25, 95%, 53%, 1); /* orange-500 */
+  --cal-bg-visualization-7-subtle: hsla(0, 96%, 89%, 1); /* red-100 */
+  --cal-bg-visualization-7-emphasis: hsla(0, 84%, 60%, 1); /* red-500 */
+
+  /* Legacy Background Components - Consider deprecating */
+  --cal-bg-info: hsla(221, 91%, 93%, 1); /* #dee9fc - info backgrounds */
+  --cal-bg-success: hsla(142, 76%, 94%, 1); /* #e2fbe8 - success backgrounds */
+  --cal-bg-attention: hsla(33, 100%, 92%, 1); /* #fceed8 - attention backgrounds */
+  --cal-bg-error: hsla(3, 66%, 93%, 1); /* #f9e3e2 - error backgrounds */
+  --cal-bg-dark-error: hsla(2, 55%, 30%, 1); /* Keeping existing dark error */
+
+  /* Borders */
+  --cal-border-emphasis: hsla(218, 11%, 65%, 1); /* gray.400 - input:hover */
+  --cal-border: hsla(216, 12%, 84%, 1); /* gray.300 - inputs */
+  --cal-border-subtle: hsla(220, 13%, 91%, 1); /* gray.200 - container borders */
+  --cal-border-muted: hsla(220, 14%, 94%, 1); /* gray.100 */
+  --cal-border-error: hsla(0, 96%, 89%, 1); /* Keeping existing error border */
+  --cal-border-semantic-error: hsla(0, 96%, 89%, 1);
+  --cal-border-booker: var(--cal-border-subtle);
+
+  /* Content/Text Standard */
+  --cal-text-emphasis: hsla(210, 30%, 4%, 1); /* gray-900 */
+  --cal-text: hsla(220, 6%, 25%, 1); /* gray-700 */
+  --cal-text-subtle: hsla(220, 9%, 46%, 1); /* gray-500 */
+  --cal-text-muted: hsla(218, 11%, 65%, 1); /* gray-400 */
+  --cal-text-inverted: hsla(0, 0%, 100%, 1); /* white */
+
+  /* Content/Text Semantic */
+  --cal-text-semantic-info: hsla(236, 80%, 25%, 1); /* blue-800 */
+  --cal-text-semantic-success: hsla(150, 84%, 22%, 1); /* green-800 */
+  --cal-text-semantic-attention: hsla(15, 79%, 34%, 1); /* orange-800 */
+  --cal-text-semantic-error: hsla(0, 63%, 24%, 1); /* red-800 */
+
+  /* Content/Text Visualization */
+  --cal-text-visualization-1: hsla(332, 79%, 25%, 1); /* pink-800 */
+  --cal-text-visualization-2: hsla(270, 91%, 25%, 1); /* purple-800 */
+  --cal-text-visualization-3: hsla(217, 91%, 25%, 1); /* blue-800 */
+  --cal-text-visualization-4: hsla(142, 71%, 25%, 1); /* green-800 */
+  --cal-text-visualization-5: hsla(45, 93%, 25%, 1); /* yellow-800 */
+  --cal-text-visualization-6: hsla(24, 95%, 25%, 1); /* orange-800 */
+  --cal-text-visualization-7: hsla(0, 84%, 25%, 1); /* red-800 */
+
+  /* Border/Semantic Subtle */
+  --cal-border-semantic-attention-subtle: hsla(32, 98%, 83%, 1);
+  --cal-border-semantic-error-subtle: hsla(0, 96%, 89%, 1);
+
+  /* Legacy Content/Text Components - Consider deprecating */
+  --cal-text-info: hsla(225, 57%, 33%, 1); /* #253985 - interactive text/icons */
+  --cal-text-success: hsla(144, 34%, 24%, 1); /* #285231 */
+  --cal-text-attention: hsla(16, 62%, 28%, 1); /* Keeping existing attention text */
+  --cal-text-error: hsla(0, 63%, 31%, 1); /* Keeping existing error text */
+
+  /* Brand */
+  --cal-brand: hsla(221, 39%, 11%, 1); /* Keeping existing brand color */
+  --cal-brand-emphasis: hsla(0, 0%, 6%, 1); /* Keeping existing brand emphasis */
+  --cal-brand-text: hsla(0, 0%, 100%, 1); /* white */
+}
+.dark {
+  /* Background Standard */
+  --cal-bg-emphasis: hsla(0, 0%, 25%, 1); /* stone-700 */
+  --cal-bg: hsla(0, 0%, 6%, 1); /* stone-950 */
+  --cal-bg-subtle: hsla(0, 0%, 15%, 1); /* stone-800 */
+  --cal-bg-muted: hsla(0, 0%, 9%, 1); /* stone-900 */
+  --cal-bg-inverted: hsla(0, 0%, 98%, 1); /* stone-50 */
+
+  /* Background Primary */
+  --cal-bg-primary: hsla(0, 0%, 96%, 1); /* stone-100 */
+  --cal-bg-primary-emphasis: hsla(0, 0%, 64%, 1); /* stone-800 */
+  --cal-bg-primary-muted: hsla(0, 0%, 15%, 1); /* stone-400 */
+
+  /* Background Brand */
+  --cal-bg-brand: hsla(0, 0%, 98%, 1); /* gray-50 */
+  --cal-bg-brand-emphasis: hsla(0, 0%, 96%, 1); /* stone-100 */
+  --cal-bg-brand-muted: hsla(0, 0%, 96%, 1); /* stone-100 */
+
+  /* Background Semantic */
+  --cal-bg-semantic-info-subtle: hsla(236, 80%, 8%, 1); /* blue-800 */
+  --cal-bg-semantic-info-emphasis: hsla(229, 90%, 74%, 1); /* blue-500 */
+  --cal-bg-semantic-success-subtle: hsla(148, 88%, 16%, 1); /* green-800 */
+  --cal-bg-semantic-success-emphasis: hsla(158, 74%, 38%, 1); /* green-500 */
+  --cal-bg-semantic-attention-subtle: hsla(21, 86%, 8%, 1); /* orange-800 */
+  --cal-bg-semantic-attention-emphasis: hsla(27, 96%, 61%, 1); /* orange-500 */
+  --cal-bg-semantic-error-subtle: hsla(0, 70%, 8%, 1); /* red-800 */
+  --cal-bg-semantic-error-emphasis: hsla(0, 91%, 71%, 1); /* red-500 */
+
+  /* Background Visualization */
+  --cal-bg-visualization-1-subtle: hsla(336, 74%, 35%, 1); /* pink-200 */
+  --cal-bg-visualization-1-emphasis: hsla(330, 81%, 60%, 1); /* pink-500 */
+  --cal-bg-visualization-2-subtle: hsla(252, 83%, 23%, 1); /* purple-200 */
+  --cal-bg-visualization-2-emphasis: hsla(256, 85%, 57%, 1); /* purple-500 */
+  --cal-bg-visualization-3-subtle: hsla(236, 74%, 35%, 1); /* blue-200 */
+  --cal-bg-visualization-3-emphasis: hsla(235, 100%, 63%, 1); /* blue-500 */
+  --cal-bg-visualization-4-subtle: hsla(150, 84%, 22%, 1); /* green-200 */
+  --cal-bg-visualization-4-emphasis: hsla(158, 74%, 38%, 1); /* green-500 */
+  --cal-bg-visualization-5-subtle: hsla(28, 73%, 26%, 1); /* yellow-200 */
+  --cal-bg-visualization-5-emphasis: hsla(45, 93%, 47%, 1); /* yellow-500 */
+  --cal-bg-visualization-6-subtle: hsla(15, 75%, 23%, 1); /* orange-200 */
+  --cal-bg-visualization-6-emphasis: hsla(25, 95%, 53%, 1); /* orange-500 */
+  --cal-bg-visualization-7-subtle: hsla(0, 70%, 35%, 1); /* red-200 */
+  --cal-bg-visualization-7-emphasis: hsla(0, 84%, 60%, 1); /* red-500 */
+
+  /* Legacy Background Components - Consider deprecating */
+  --cal-bg-info: hsla(228, 56%, 33%, 1); /* Keeping existing info background */
+  --cal-bg-success: hsla(133, 34%, 24%, 1); /* Keeping existing success background */
+  --cal-bg-attention: hsla(16, 62%, 28%, 1); /* Keeping existing attention background */
+  --cal-bg-error: hsla(2, 55%, 30%, 1); /* Keeping existing error background */
+  --cal-bg-dark-error: hsla(2, 55%, 30%, 1); /* Keeping existing dark error */
+
+  /* Border Standard */
+  --cal-border: hsla(0, 0%, 30%, 1); /* stone-600 */
+  --cal-border-muted: hsla(0, 0%, 9%, 1); /* stone-500 */
+  --cal-border-subtle: hsla(0, 0%, 15%, 1); /* stone-700 */
+  --cal-border-emphasis: hsla(0, 0%, 45%, 1); /* stone-800 */
+  --cal-border-booker: var(--cal-border-subtle);
+  /* Border Semantic */
+  --cal-border-semantic-error: hsla(0, 63%, 24%, 1); /* red-800 */
+
+  /* Border/Semantic Subtle */
+  --cal-border-semantic-attention-subtle: hsla(15, 75%, 23%, 1);
+  --cal-border-semantic-error-subtle: hsla(0, 63%, 24%, 1);
+
+  /* Legacy Border - Consider deprecating */
+  --cal-border-error: hsla(0, 63%, 24%, 1); /* Keeping existing error border */
+
+  /* Content/Text Standard */
+  --cal-text-emphasis: hsla(0, 0%, 98%, 1); /* stone-50 */
+  --cal-text: hsla(0, 0%, 83%, 1); /* stone-300 */
+  --cal-text-subtle: hsla(0, 0%, 64%, 1); /* stone-400 */
+  --cal-text-muted: hsla(0, 0%, 64%, 1); /* stone-400 */
+  --cal-text-inverted: hsla(0, 0%, 0%, 1); /* black */
+
+  /* Content/Text Semantic */
+  --cal-text-semantic-info: hsla(229, 90%, 74%, 1); /* blue-100 */
+  --cal-text-semantic-success: hsla(161, 49%, 54%, 1); /* green-100 */
+  --cal-text-semantic-attention: hsla(27, 96%, 61%, 1); /* orange-100 */
+  --cal-text-semantic-error: hsla(0, 91%, 71%, 1); /* red-100 */
+
+  /* Content/Text Semantic Emphasis */
+  --cal-text-semantic-info-emphasis: hsla(217, 91%, 25%, 1); /* blue-800 */
+  --cal-text-semantic-success-emphasis: hsla(142, 71%, 25%, 1); /* green-800 */
+  --cal-text-semantic-attention-emphasis: hsla(24, 95%, 25%, 1); /* orange-800 */
+  --cal-text-semantic-error-emphasis: hsla(0, 84%, 25%, 1); /* red-800 */
+
+  /* Legacy Content/Text Components - Consider deprecating */
+  --cal-text-info: hsla(218, 83%, 93%, 1); /* Keeping existing info text */
+  --cal-text-success: hsla(134, 76%, 94%, 1); /* Keeping existing success text */
+  --cal-text-attention: hsla(37, 86%, 92%, 1); /* Keeping existing attention text */
+  --cal-text-error: hsla(3, 66%, 93%, 1); /* Keeping existing error text */
+
+  /* Brand */
+  --cal-brand: hsla(0, 0%, 100%, 1); /* white */
+  --cal-brand-emphasis: hsla(218, 11%, 65%, 1); /* Keeping existing brand emphasis */
+  --cal-brand-text: hsla(0, 0%, 0%, 1); /* black */
+}
+
+@layer base {
+  * {
+    @apply border-default;
+  }
+}
+
+::-moz-selection {
+  color: var(--cal-brand-text);
+  background: var(--cal-brand);
+}
+
+::selection {
+  color: var(--cal-brand-text);
+  background: var(--cal-brand);
+}
 
 body  {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-}
-
-:root {
-  --brand-color: #292929;
-  --brand-text-color: #ffffff;
-  --brand-color-dark-mode: #fafafa;
-  --brand-text-color-dark-mode: #292929;
 }
 
 /*
@@ -21,11 +276,15 @@ body  {
     https://docs.todesktop.com/
 */
 
+html.todesktop-platform-win32 .todesktop\:\!bg-transparent {
+  background: inherit !important;
+}
+
 /* disable user selection on buttons, links and images on desktop app */
 html.todesktop button,
 html.todesktop a,
 html.todesktop img,
-html.todesktop header{
+html.todesktop header {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
@@ -36,75 +295,40 @@ html.todesktop header{
 }
 
 html.todesktop,
-html.todesktop div  {
+html.todesktop div {
   cursor: default !important;
 }
 
 /* make header draggable on desktop app */
-html.todesktop header{
+html.todesktop header {
   -webkit-app-region: drag;
 }
-html.todesktop header button{
+
+html.todesktop header button,
+html.todesktop header a {
   -webkit-app-region: no-drag;
 }
 
-html.todesktop .logo {
-  display: none;
-}
-
-.desktop-only {
-  display: none;
-}
-
-html.todesktop .desktop-only {
-  display: block;
-}
-
-html.todesktop .desktop-hidden {
-  display: none;
-}
-
-html.todesktop header {
-  margin-top: -14px;
-}
-
-html.todesktop header nav {
-  margin-top: 8px;
-}
-
-html.todesktop aside {
-  margin:0px -6px;
-}
-
-/* TODO: add "native" MacOS colors
-   requires darkmode for MacOS first
-
-html.todesktop .desktop-transparent{
+html.todesktop-platform-darwin body,
+html.todesktop-platform-darwin aside {
   background: transparent !important;
-  border: none !important;
 }
 
-html.todesktop aside a {
-  height: 28px;
-  padding: 0px 8px;
-  font-size: 12px;
-  color: #383438 !important
+html.todesktop-platform-darwin.dark main.bg-default {
+  background: rgba(0, 0, 0, 0.6) !important;
 }
 
-html.todesktop nav a:hover{
-  background-color: inherit !important
+html.todesktop-platform-darwin.light main.bg-default {
+  background: rgba(255, 255, 255, 0.8) !important;
 }
 
-html.todesktop nav a[aria-current="page"]{
-  background: rgba(0, 0, 0, 0.1) !important;
+html.todesktop.light {
+  --cal-bg-emphasis: hsla(0, 0%, 11%, 0.1);
 }
 
-html.todesktop nav a svg{
-  color: #0272F7 !important
+html.todesktop.dark {
+  --cal-bg-emphasis: hsla(220, 2%, 26%, 0.3);
 }
-*/
-
-
 
 /*
   Adds Utility to hide scrollbar to tailwind
@@ -112,16 +336,14 @@ html.todesktop nav a svg{
     https://github.com/tailwindlabs/tailwindcss/pull/5732
 */
 @layer utilities {
-  @variants responsive {
-    /* Chrome, Safari and Opera */
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
+  /* Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 
-    .no-scrollbar {
-      -ms-overflow-style: none; /* IE and Edge */
-      scrollbar-width: none; /* Firefox */
-    }
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
   }
 }
 
@@ -149,32 +371,17 @@ select:focus {
   --tw-ring-color: var(--brand-color);
   border-color: var(--brand-color);
 }
-/*  https://stackoverflow.com/a/69308190 */
-input[type='text']:focus { box-shadow: none; }
 
-
-button[role="switch"][data-state="checked"] {
-  @apply bg-gray-900;
+@layer components {
+  .scroll-bar {
+    @apply scrollbar-thin scrollbar-thumb-rounded-md dark:scrollbar-thumb-darkgray-300 scrollbar-thumb-gray-300 scrollbar-track-transparent;
+  }
 }
+
 /* TODO: avoid global specific css */
 /* button[role="switch"][data-state="checked"] span {
   transform: translateX(16px);
 } */
-
-/* DateRangePicker */
-/*
-  TODO:: Remove on V2 launch
- */
-.react-daterange-picker > .react-daterange-picker__wrapper {
-  /* border consistent with other inputs */
-  @apply rounded-sm border-gray-300 px-2 py-1.5 text-sm lg:py-1;
-}
-
-.react-daterange-picker > .react-daterange-picker__wrapper input {
-  /* Makes sure the on-focus behaviour is like Cal.com's */
-  @apply my-0.5 h-auto rounded-sm py-0.5;
-}
-
 
 @layer components {
   /* slider */
@@ -183,36 +390,24 @@ button[role="switch"][data-state="checked"] {
   }
 
   .slider > .slider-track {
-    @apply relative h-1 flex-grow rounded-md bg-neutral-400;
+    @apply relative h-1 flex-grow rounded-md bg-gray-400;
   }
 
   .slider .slider-range {
-    @apply absolute h-full rounded-full bg-neutral-700;
+    @apply absolute h-full rounded-full bg-gray-700;
   }
 
   .slider .slider-thumb {
-    @apply block h-3 w-3 cursor-pointer rounded-full bg-neutral-700 transition-all;
+    @apply block h-3 w-3 cursor-pointer rounded-full bg-gray-700 transition-all;
   }
 
   .slider .slider-thumb:hover {
-    @apply bg-neutral-600;
+    @apply bg-gray-600;
   }
 
   .slider .slider-thumb:focus {
     box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.2);
   }
-
-}
-
-/* !important to style multi-email input */
-::-moz-selection {
-  color: white;
-  background: black;
-}
-
-::selection {
-  color: white;
-  background: black;
 }
 
 /* hide chat bubble on mobile */
@@ -236,52 +431,7 @@ button[role="switch"][data-state="checked"] {
   }
 }
 
-.react-multi-email > [type="text"] {
-  @apply dark:placeholder:text-darkgray-600 focus:border-brand dark:border-darkgray-300 dark:text-darkgray-900 block w-full rounded-md border-gray-300 text-sm focus:ring-black disabled:bg-gray-200 disabled:hover:cursor-not-allowed dark:bg-transparent dark:selection:bg-green-500 disabled:dark:text-gray-500 dark:text-white;
-}
-
-.react-multi-email [data-tag] {
-  box-shadow: none !important;
-  @apply dark:bg-brand my-1 inline-flex items-center rounded-md border border-transparent bg-neutral-200 px-2 py-1 text-sm font-medium text-gray-900 hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2 ltr:mr-2 rtl:ml-2 dark:text-white;
-}
-
-.react-multi-email > span[data-placeholder] {
-  display: none;
-  position: absolute;
-  left: 0.8rem;
-  top: 0.75rem;
-  line-height: 1.25rem;
-  font-size: 0.875rem;
-}
-
-.react-multi-email.empty > span[data-placeholder] {
-  display: inline;
-  color: #646b7a;
-}
-
-.react-multi-email.focused > span[data-placeholder] {
-  display: none;
-}
-
-.react-multi-email > input {
-  width: 100% !important;
-  display: inline-block !important;
-  @apply mt-1;
-}
-
-.react-multi-email [data-tag] {
-  @apply my-1 inline-flex items-center rounded-md border border-transparent bg-neutral-200 px-2 py-1 text-sm font-medium text-gray-900 hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2 ltr:mr-2 rtl:ml-2 dark:bg-neutral-900 dark:text-white dark:hover:bg-neutral-700;
-}
-
-.react-multi-email [data-tag] [data-tag-item] {
-  max-width: 100%;
-  overflow: hidden;
-}
-
-.react-multi-email [data-tag] [data-tag-handle] {
-  margin-left: 0.833em;
-  cursor: pointer;
-}
+/* TODO: implement styling for react-multi-email */
 
 /* !important to override react-dates */
 .DateRangePickerInput__withBorder {
@@ -374,27 +524,7 @@ button[role="switch"][data-state="checked"] {
   }
 }
 
-nav#nav--settings > a {
-  @apply flex items-center border-l-4 border-transparent px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-50 hover:text-gray-900;
-}
-
-nav#nav--settings > a svg {
-  @apply mr-3 -ml-1 h-6 w-6 flex-shrink-0 text-gray-400 group-hover:text-gray-500;
-}
-
-nav#nav--settings > a.active {
-  @apply border-neutral-500 bg-neutral-50 text-neutral-700 hover:bg-neutral-50 hover:text-neutral-700;
-}
-
-nav#nav--settings > a.active svg {
-  @apply text-neutral-500;
-}
-
-hr {
-  @apply border-gray-200;
-}
-
-.text-white-important {
+.text-inverted-important {
   color: white !important;
 }
 
@@ -490,4 +620,26 @@ hr {
 
 ::-webkit-search-cancel-button {
   -webkit-appearance: none;
+}
+
+.react-tel-input .country-list .country:hover,
+.react-tel-input .country-list .country.highlight {
+  @apply !bg-emphasis;
+}
+
+.react-tel-input .flag-dropdown .selected-flag,
+.react-tel-input .flag-dropdown.open .selected-flag {
+  @apply !bg-default;
+}
+
+.react-tel-input .flag-dropdown {
+  @apply !border-r-default left-0.5 !border-y-0 !border-l-0;
+}
+
+.intercom-lightweight-app {
+  @apply z-40 !important;
+}
+
+[data-radix-popper-content-wrapper] {
+  border: none;
 }

@@ -1,7 +1,9 @@
 import classNames from "classnames";
-import React, { PropsWithChildren } from "react";
+import type { PropsWithChildren } from "react";
+import React from "react";
 
-import { Dialog, DialogContent } from "@calcom/ui";
+import { Dialog } from "@calcom/features/components/controlled-dialog";
+import { DialogContent } from "@calcom/ui/components/dialog";
 
 export default function ModalContainer(
   props: PropsWithChildren<{
@@ -13,12 +15,12 @@ export default function ModalContainer(
   }>
 ) {
   return (
-    <div className="flex min-h-screen items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+    <div className="flex min-h-screen items-end justify-center px-4 pb-20 pt-4 text-center sm:block sm:p-0">
       <Dialog open={props.isOpen} onOpenChange={props.onExit}>
         <DialogContent>
           <div
             className={classNames(
-              "inline-block w-full transform bg-white text-left align-bottom transition-all sm:align-middle",
+              "bg-default inline-block w-full transform text-left align-bottom transition-all sm:align-middle",
               {
                 "sm:w-full sm:max-w-lg ": !props.wide,
                 "sm:w-4xl sm:max-w-4xl": props.wide,
